@@ -1,0 +1,2 @@
+D:/Semester 4/PA II/Week 10/Praktikum/PA-II-Kelompok-09/Mobile/gignego_new/gignego_new/android/app/.cxx/Debug/e2z6g733/x86/CMakeFiles/edit_cache.dir
+D:/Semester 4/PA II/Week 10/Praktikum/PA-II-Kelompok-09/Mobile/gignego_new/gignego_new/android/app/.cxx/Debug/e2z6g733/x86/CMakeFiles/rebuild_cache.dir

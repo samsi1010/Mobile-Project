@@ -1,0 +1,2 @@
+D:/Semester 4/PA II/Week 12/Praktikum/gignego_new/gignego_new/android/app/.cxx/Debug/1k1r3b4q/x86/CMakeFiles/edit_cache.dir
+D:/Semester 4/PA II/Week 12/Praktikum/gignego_new/gignego_new/android/app/.cxx/Debug/1k1r3b4q/x86/CMakeFiles/rebuild_cache.dir
