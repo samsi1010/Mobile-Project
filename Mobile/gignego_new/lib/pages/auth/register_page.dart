@@ -28,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
 
-      final url = Uri.parse('http://192.168.145.165:8080/register');
+      final url = Uri.parse('http://192.168.100.4:8080/register');
 
       final response = await http.post(
         url,

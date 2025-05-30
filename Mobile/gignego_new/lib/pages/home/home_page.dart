@@ -154,24 +154,7 @@ class _HomePageState extends State<HomePage> {
                       _buildCategorySection(context),
                       _buildJobSuggestion(),
                       // List pekerjaan yang diambil dari database
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: pekerjaan.length,
-                        itemBuilder: (context, index) {
-                          final job = pekerjaan[index];
-                          return ListTile(
-                              title: Text(job.namaPekerjaan),
-                              subtitle: Text(job.deskripsi),
-                              trailing: IconButton(
-                                  icon: Icon(Icons.delete),
-                                  onPressed: () {
-                                    if (job.id != null) {
-                                      hapusPekerjaan(job.id!);
-                                    }
-                                  }));
-                        },
-                      ),
+                     
                       if (pekerjaanBaru != null)
                         _buildNewJobNotification(context),
                     ],
@@ -392,15 +375,8 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Saran Kerja",
-                style: GoogleFonts.poppins(
-                    fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "Selengkapnya",
-                style: GoogleFonts.poppins(color: Colors.blue),
-              ),
+              
+              
             ],
           ),
           SizedBox(height: 12),
@@ -422,7 +398,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Mengecat Rumah",
+                  "Setiap tugas yang kamu ambil adalah langkah menuju impianmu",
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -431,7 +407,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  '"Suka bekerja di luar ruangan?" kami mencari tenaga pengecatan rumah untuk membantu dalam renovasi',
+                  'Tak ada pekerjaan yang terlalu kecil, karena dari hal-hal sederhana, kesuksesan besar bisa tumbuh.',
                   style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
                 ),
               ],

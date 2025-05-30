@@ -5,6 +5,7 @@ import 'package:flutter_application/pages/home/job_detail_page.dart';
 import 'package:flutter_application/pages/home/database_helper.dart';
 import 'package:flutter_application/pages/home/form_page.dart'; // pastikan kamu punya ini untuk hapus dari API
 import 'package:flutter_application/pages/home/PendaftarPage.dart';
+import 'package:flutter_application/pages/home/CustomBottomNavBar.dart';
 
 class StatusKerjaPage extends StatefulWidget {
   final String userEmail; // terima email user
@@ -25,11 +26,13 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
   late ScrollController _scrollController;
 
   final List<String> statusFilter = [
-    'Semua',
-    'Tersedia',
-    'Dalam Proses',
-    'Selesai',
-  ];
+  'Semua',
+  'Tersedia',
+  'Dalam Proses',
+  'Selesai',
+  'Kadaluarsa',  // Tambahan filter baru
+];
+
 
   List<Map<String, String>> get tanggalList {
     DateTime currentDate = DateTime.now();
@@ -93,29 +96,36 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
     }
 
     void updateJobInList(Job updatedJob) {
-  setState(() {
-    int index = pekerjaan.indexWhere((job) => job.id == updatedJob.id);
-    if (index != -1) {
-      pekerjaan[index] = updatedJob;
-    } else {
-      pekerjaan.add(updatedJob);
+      setState(() {
+        int index = pekerjaan.indexWhere((job) => job.id == updatedJob.id);
+        if (index != -1) {
+          pekerjaan[index] = updatedJob;
+        } else {
+          pekerjaan.add(updatedJob);
+        }
+      });
     }
-  });
-}
-
   }
 
   List<Job> _filteredJobs() {
-    String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
-    String selectedStatus = statusFilter[selectedFilterIndex];
+  String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
+  String selectedStatus = statusFilter[selectedFilterIndex];
 
-    return pekerjaan.where((job) {
-      bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
-      bool matchStatus =
-          selectedStatus == 'Semua' || job.status == selectedStatus;
+  return pekerjaan.where((job) {
+    bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
+
+    if (selectedStatus == 'Kadaluarsa') {
+      // Tampilkan semua pekerjaan status kadaluarsa, abaikan tanggal
+      return job.status == 'Kadaluarsa';
+    } else {
+      // Untuk status lain, filter berdasarkan tanggal dan status
+      bool matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
       return matchTanggal && matchStatus;
-    }).toList();
-  }
+    }
+  }).toList();
+}
+
+
 
   // Tambahkan fungsi konfirmasi hapus
   Future<void> konfirmasiHapus(BuildContext context, int jobId) async {
@@ -159,149 +169,174 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final jobs = _filteredJobs();
+ @override
+Widget build(BuildContext context) {
+  final jobs = _filteredJobs();
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios),
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            color: Colors.black,
+            onPressed: () => Navigator.pop(context),
+          ),
+          SizedBox(width: 4),
+          Text(
+            'Status Kerja',
+            style: TextStyle(
               color: Colors.black,
-              onPressed: () => Navigator.pop(context),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
-            SizedBox(width: 4),
-            Text(
-              'Status Kerja',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTanggal(),
-            SizedBox(height: 10),
-            _buildFilterStatus(),
-            Expanded(
-              child: jobs.isEmpty
-                  ? Center(child: Text("Belum ada pekerjaan di kategori ini."))
-                  : ListView.builder(
-                      controller: _scrollController,
-                      itemCount: jobs.length,
-                      itemBuilder: (context, index) {
-                        final job = jobs[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => JobDetailPage(
-                                    job: job,
-                                    currentUserEmail: widget
-                                        .userEmail, // atau currentUserEmail yang valid
-                                  ),
+    ),
+    body: SafeArea(
+      child: Column(
+        children: [
+          _buildTanggal(),
+          SizedBox(height: 10),
+          _buildFilterStatus(),
+          Expanded(
+            child: jobs.isEmpty
+                ? Center(child: Text("Belum ada pekerjaan di kategori ini."))
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: jobs.length,
+                    itemBuilder: (context, index) {
+                      final job = jobs[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => JobDetailPage(
+                                  job: job,
+                                  currentUserEmail: widget.userEmail,
                                 ),
-                              );
-                            },
-                            child: Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: ListTile(
-                                contentPadding: EdgeInsets.all(12),
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: job.gambar1.isNotEmpty
-                                      ? Image.file(
-                                          File(job.gambar1),
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Icon(Icons.image, size: 60),
-                                        )
-                                      : Icon(Icons.image, size: 60),
-                                ),
-                                title: Text(
-                                  job.namaPekerjaan,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Tombol Edit
-                                    IconButton(
-  icon: Icon(Icons.edit, color: Colors.blue),
-  tooltip: 'Edit Pekerjaan',
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FormPage(
-          job: job,
-          onJobAdded: (updatedJob) {
-            ambilPekerjaanDariDB(); // Refresh data di UI setelah update
-          },
-        ),
-      ),
-    );
-  },
-),
-
-                                    // Tombol Lihat Pelamar
-                                    IconButton(
-                                      icon: Icon(Icons.people,
-                                          color: Colors.green),
-                                      tooltip: 'Lihat Pelamar',
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PendaftarPage(jobId: job.id!),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.all(12),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: job.gambar1.isNotEmpty
+                                    ? Image.file(
+                                        File(job.gambar1),
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Icon(Icons.image, size: 60),
+                                      )
+                                    : Icon(Icons.image, size: 60),
+                              ),
+                              title: Text(
+                                job.namaPekerjaan,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.edit, color: Colors.blue),
+                                    tooltip: 'Edit Pekerjaan',
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => FormPage(
+                                            job: job,
+                                            onJobAdded: (updatedJob) {
+                                              ambilPekerjaanDariDB();
+                                            },
                                           ),
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon:
-                                          Icon(Icons.delete, color: Colors.red),
-                                      tooltip: 'Hapus Pekerjaan',
-                                      onPressed: () {
-                                        if (job.id != null) {
-                                          konfirmasiHapus(context, job.id!);
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.people, color: Colors.green),
+                                    tooltip: 'Lihat Pelamar',
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              PendaftarPage(jobId: job.id!),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    tooltip: 'Hapus Pekerjaan',
+                                    onPressed: () {
+                                      if (job.id != null) {
+                                        konfirmasiHapus(context, job.id!);
+                                      }
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FormPage(
+              onJobAdded: (newJob) {
+                ambilPekerjaanDariDB();
+              },
+            ),
+          ),
+        );
+      },
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      highlightElevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+      child: Image.asset(
+        'assets/add.png',
+        width: 60,
+        height: 60,
+      ),
+    ),
+
+    bottomNavigationBar: CustomBottomNavBar(
+      currentIndex: 2,
+      currentUserEmail: widget.userEmail,
+    ),
+  );
+}
+
 
   Widget _buildTanggal() {
     return SingleChildScrollView(
@@ -348,33 +383,33 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
   }
 
   Widget _buildFilterStatus() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: List.generate(statusFilter.length, (index) {
-          final selected = selectedFilterIndex == index;
-          return GestureDetector(
-            onTap: () => setState(() => selectedFilterIndex = index),
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 6),
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected ? Color(0xFFB599EC) : Color(0xFFF3E9FF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                statusFilter[index],
-                style: TextStyle(
-                  fontSize: 14,
-                  color: selected ? Colors.white : Colors.black54,
-                  fontWeight: FontWeight.w500,
-                ),
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    padding: EdgeInsets.symmetric(horizontal: 12),
+    child: Row(
+      children: List.generate(statusFilter.length, (index) {
+        final selected = selectedFilterIndex == index;
+        return GestureDetector(
+          onTap: () => setState(() => selectedFilterIndex = index),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 6),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected ? Color(0xFFB599EC) : Color(0xFFF3E9FF),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusFilter[index],
+              style: TextStyle(
+                fontSize: 14,
+                color: selected ? Colors.white : Colors.black54,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          );
-        }),
-      ),
-    );
-  }
+          ),
+        );
+      }),
+    ),
+  );
+}
 }

@@ -6,6 +6,7 @@ import 'package:flutter_application/pages/profil/tambah_pendidikan.dart';
 import 'package:flutter_application/pages/profil/tambah_skill.dart';
 import 'package:flutter_application/pages/profil/tambah_cv.dart';
 import 'package:flutter_application/pages/profil/tambah_pertanyaan.dart';
+import 'package:flutter_application/pages/home/CustomBottomNavBar.dart';
 
 class ProfilPage extends StatefulWidget {
   @override
@@ -15,10 +16,26 @@ class _ProfilPageState extends State<ProfilPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      floatingActionButton: CustomFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomNavBar(),
+      
+      bottomNavigationBar: CustomBottomNavBar(
+      currentIndex: 3,
+      currentUserEmail: null, // atau dapatkan dari shared prefs jika perlu
+    ),floatingActionButton: FloatingActionButton(
+  onPressed: () {
+    // Fungsi FAB sama seperti di home, misal navigasi ke FormPage
+  },
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  highlightElevation: 0,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+  child: Image.asset(
+    'assets/add.png',
+    width: 60,
+    height: 60,
+  ),
+),
+floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
       body: SingleChildScrollView(
         child: Column(
           children: [

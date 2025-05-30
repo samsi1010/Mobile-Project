@@ -4,7 +4,8 @@ import 'package:flutter_application/pages/profil/ubah_nomor.dart';
 import 'package:flutter_application/pages/profil/ubah_password.dart';
 import 'package:flutter_application/pages/profil/nonaktif_akun.dart';
 import 'package:flutter_application/pages/profil/hapus_akun.dart';
-import 'package:flutter_application/pages/profil/login.dart'; // untuk logout redirect harusnya loginnya punya si sam
+// import 'package:flutter_application/pages/profil/login.dart'; // untuk logout redirect harusnya loginnya punya si sam
+import 'package:flutter_application/pages/auth/login.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({Key? key}) : super(key: key);

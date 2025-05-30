@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/models/applicant.dart';
 
 class ApiService {
-  static const String apiUrl = 'http://192.168.145.165:8080/job-postings';
+  static const String apiUrl = 'http://192.168.100.4:8080/job-postings';
 
   // Fungsi untuk mengirim data pekerjaan baru ke API
   static Future<bool> createJob(Job job) async {
@@ -87,7 +87,7 @@ class ApiService {
 
 static Future<bool> deleteJobFromApi(int id) async {
     final response = await http.delete(
-      Uri.parse('http://192.168.145.165:8080/job-postings/id'),
+      Uri.parse('http://192.168.100.4:8080/job-postings/id'),
     );
 
     if (response.statusCode == 200) {
@@ -99,7 +99,7 @@ static Future<bool> deleteJobFromApi(int id) async {
   }
 
   static Future<bool> updateJob(Job job) async {
-  final url = Uri.parse('http://192.168.145.165:8080/job-postings/${job.id}');
+  final url = Uri.parse('http://192.168.100.4:8080/job-postings/${job.id}');
   try {
     var request = http.MultipartRequest('PUT', url);
 
@@ -141,7 +141,7 @@ static Future<bool> deleteJobFromApi(int id) async {
   }
 }
 static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
-  final url = Uri.parse('http://192.168.145.165:8080/applications?job_id=$jobId');
+  final url = Uri.parse('http://192.168.100.4:8080/applications?job_id=$jobId');
   final response = await http.get(url);
 
   if (response.statusCode == 200) {
