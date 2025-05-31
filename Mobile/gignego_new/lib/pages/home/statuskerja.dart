@@ -95,7 +95,9 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
       return false;
     }
 
-    void updateJobInList(Job updatedJob) {
+   
+  }
+   void updateJobInList(Job updatedJob) {
       setState(() {
         int index = pekerjaan.indexWhere((job) => job.id == updatedJob.id);
         if (index != -1) {
@@ -105,7 +107,6 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
         }
       });
     }
-  }
 
   List<Job> _filteredJobs() {
   String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';

@@ -91,6 +91,10 @@ class _JobDetailPageState extends State<JobDetailPage> {
                               namaPekerjaan: widget.job.namaPekerjaan,
                               harga: 'Rp${widget.job.hargaPekerjaan},00',
                               lamaPengerjaan: widget.job.waktu,
+                              jobPostingId: widget
+                                  .job.id!, // Pastikan id ada dan tidak null
+                              userEmail: widget
+                                  .currentUserEmail, // Pastikan email user tersedia di widget ini
                             ),
                           ),
                         );
