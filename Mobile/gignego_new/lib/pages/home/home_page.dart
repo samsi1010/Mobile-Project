@@ -8,6 +8,8 @@ import 'package:flutter_application/pages/profil/profil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/home/database_helper.dart';
+import 'package:flutter_application/pages/home/chat.dart';
+import 'package:flutter_application/pages/home/chatroom.dart';
 
 void main() {
   runApp(MyApp());
@@ -116,7 +118,7 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       bottomNavigationBar:
-          _buildBottomNavBar(context, 0), // 0 adalah index untuk Home
+          _buildBottomNavBar(context, 0,currentUserEmail), // 0 adalah index untuk Home
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           print('Navigasi ke FormPage');
@@ -496,7 +498,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Bottom Navigation Bar dengan indikator halaman aktif
-  Widget _buildBottomNavBar(BuildContext context, int currentIndex) {
+  Widget _buildBottomNavBar(BuildContext context, int currentIndex, String? currentUserEmail) {
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
       notchMargin: 8,
@@ -515,15 +517,29 @@ class _HomePageState extends State<HomePage> {
                 // Sudah di halaman home, tidak perlu navigasi
               },
             ),
-            _buildNavItem(
-              context,
-              "assets/obrolan.png",
-              1,
-              currentIndex,
-              () {
-                // Kalau ada navigasi ke chat, tulis di sini
-              },
-            ),
+           _buildNavItem(
+            context,
+            "assets/obrolan.png",
+            1,
+            currentIndex,
+            () {
+              if (currentUserEmail == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('User belum login')),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatRoomListPage(currentUserEmail: currentUserEmail),
+                ),
+              );
+            },
+          ),
+
+
             _buildNavItem(
               context,
               "assets/aktivitas.png",

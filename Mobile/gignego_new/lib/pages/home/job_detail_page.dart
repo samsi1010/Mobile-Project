@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/pages/models/job.dart';
 import 'package:flutter_application/pages/home/form_daftar_kerja.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:flutter_application/pages/home/chat.dart';
 
 class JobDetailPage extends StatefulWidget {
   final Job job;
@@ -67,19 +68,39 @@ class _JobDetailPageState extends State<JobDetailPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Logika negosiasi bisa ditambahkan di sini
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF9E61EB),
-                      ),
-                      child: Text(
-                        'Lakukan Negosiasi',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
+  child: ElevatedButton(
+     onPressed: () {
+    final senderEmail = widget.currentUserEmail;
+    final receiverEmail = widget.job.email;
+    final jobId = widget.job.id;
+
+    if (senderEmail == receiverEmail) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tidak bisa negosiasi dengan diri sendiri')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage(
+          chatWithEmail: receiverEmail,
+          jobId: jobId,
+        ),
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Color(0xFF9E61EB),
+    ),
+    child: Text(
+      'Lakukan Negosiasi',
+      style: TextStyle(color: Colors.white),
+    ),
+  ),
+),
+
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(

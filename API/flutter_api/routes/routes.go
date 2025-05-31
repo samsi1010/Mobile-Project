@@ -73,4 +73,10 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/applications/check", applicationController.CheckApplication)
 	router.PATCH("/applications/:id", applicationController.UpdateApplicationStatus)
 
+	messageController := controllers.MessageController{}
+
+	router.GET("/messages", messageController.GetMessages)
+	router.POST("/messages", messageController.SendMessage)
+	router.GET("/chatrooms", messageController.GetChatRooms)
+
 }
