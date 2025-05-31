@@ -78,6 +78,9 @@ class _AlasanPekerjaanPageState extends State<AlasanPekerjaanPage> {
       'alasan': alasanController.text.trim(),
     };
 
+      print("Mengirim lamaran dengan job_posting_id: ${widget.jobPostingId}");
+  print('Kirim data ke API: ${jsonEncode(data)}');
+
     final url = Uri.parse('http://192.168.100.4:8080/applications');
     final response = await http.post(
       url,

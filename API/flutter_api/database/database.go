@@ -31,7 +31,7 @@ func InitDB() *gorm.DB {
 	dbPass := getEnv("DB_PASS", "")
 	dbHost := getEnv("DB_HOST", "127.0.0.1")
 	dbPort := getEnv("DB_PORT", "3307")
-	dbName := getEnv("DB_NAME", "laravel")
+	dbName := getEnv("DB_NAME", "gignego")
 
 	// Format Data Source Name (DSN)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&loc=Local",

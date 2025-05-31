@@ -4,6 +4,7 @@ import (
 	"flutter_api/database"
 	"flutter_api/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -23,13 +24,22 @@ func (ctrl *ApplicationController) CreateApplication(c *gin.Context) {
 		return
 	}
 
+	db := database.GetDB()
+
+	// Validasi job posting ada
+	var jobPosting models.JobPosting
+	if err := db.First(&jobPosting, input.JobPostingID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Job posting tidak ditemukan"})
+		return
+	}
+
+	// Buat aplikasi baru
 	application := models.Application{
 		JobPostingID: input.JobPostingID,
 		UserEmail:    input.UserEmail,
 		Alasan:       input.Alasan,
 	}
 
-	db := database.GetDB()
 	if err := db.Create(&application).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -38,17 +48,29 @@ func (ctrl *ApplicationController) CreateApplication(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Alasan berhasil dikirim", "application": application})
 }
 
-func (ctrl *ApplicationController) GetApplications(c *gin.Context) {
+func (ctrl *ApplicationController) GetApplicationsByJob(c *gin.Context) {
+	jobIDStr := c.Query("job_id")
+	if jobIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "job_id parameter is required"})
+		return
+	}
+
+	jobID, err := strconv.ParseUint(jobIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid job_id parameter"})
+		return
+	}
+
 	db := database.GetDB()
 	var applications []models.Application
-
-	if err := db.Find(&applications).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data aplikasi"})
+	if err := db.Where("job_posting_id = ?", jobID).Find(&applications).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get applications"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"applications": applications})
 }
+
 func (ctrl *ApplicationController) CheckApplication(c *gin.Context) {
 	jobID := c.Query("job_posting_id")
 	userEmail := c.Query("user_email")

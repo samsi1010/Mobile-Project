@@ -64,7 +64,7 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
                     child: Column(
                       children: [
                         SizedBox(height: 40),
-                        Text("Yenny Angelita Gurning",
+                        Text("User",
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -94,63 +94,6 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
                           child: Text("Edit Profil",
                               style: TextStyle(color: Colors.white)),
                         ),
-                        SizedBox(height: 20),
-                        Container(
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black12, blurRadius: 5)
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text(
-                                          "Penghasilan Belum \nJatuh Tempo (Rp)",
-                                          textAlign: TextAlign.center),
-                                      SizedBox(height: 5),
-                                      Text("50.000,00",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                  Container(
-                                      width: 1, height: 40, color: Colors.grey),
-                                  Column(
-                                    children: [
-                                      Text("Aset Penghasilan (Rp)",
-                                          textAlign: TextAlign.center),
-                                      SizedBox(height: 5),
-                                      Text("2.000.000,00",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Divider(color: Colors.grey),
-                              Row(
-                                children: [
-                                  Icon(Icons.info_outline,
-                                      color: Colors.grey, size: 16),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                      child: Text(
-                                          "Penghasilan belum jatuh tempo akan cair dalam 2 hari setelah waktu kerja")),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 20),
                         ProfileSection(
                             icon: Icons.business_center,
                             title: "Pengalaman Kerja",

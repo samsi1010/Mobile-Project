@@ -16,7 +16,7 @@ class JobListPage extends StatefulWidget {
     required this.job,
     this.showNotification = false,
     required this.selectedCategory,
-    required this.currentUserEmail, // wajib diisi
+    required this.currentUserEmail,
   }) : super(key: key);
 
   @override
@@ -27,6 +27,8 @@ class _JobListPageState extends State<JobListPage> {
   int selectedDateIndex = 0;
   int selectedFilterIndex = 0;
   late ScrollController _scrollController;
+
+  List<Job> listPekerjaan = [];
 
   List<Map<String, String>> get tanggalList {
     DateTime currentDate = DateTime.now();
@@ -61,13 +63,15 @@ class _JobListPageState extends State<JobListPage> {
     super.initState();
     _scrollController = ScrollController();
 
+    listPekerjaan = List<Job>.from(widget.job);
+
     if (widget.showNotification) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Iklan berhasil ditambahkan!")),
         );
 
-        if (widget.job.isNotEmpty) {
+        if (listPekerjaan.isNotEmpty) {
           Future.delayed(Duration(milliseconds: 500), () {
             _scrollController.animateTo(
               _scrollController.position.maxScrollExtent,
@@ -80,10 +84,12 @@ class _JobListPageState extends State<JobListPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  void ambilPekerjaanDariDB() async {
+    final dataDariDB = await DatabaseHelper.instance.getJobs();
+    setState(() {
+      listPekerjaan.clear();
+      listPekerjaan.addAll(dataDariDB);
+    });
   }
 
   bool isSameDate(String tanggalJob, String selectedFullDate) {
@@ -102,37 +108,24 @@ class _JobListPageState extends State<JobListPage> {
     String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
     String selectedStatus = statusFilter[selectedFilterIndex];
 
-    return widget.job.where((job) {
+    return listPekerjaan.where((job) {
       bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
       bool matchStatus =
           selectedStatus == 'Semua' || job.status == selectedStatus;
-      bool excludeCurrentUserJob = job.email !=
-          widget.currentUserEmail; // Kecualikan pekerjaan user sendiri
+      bool excludeCurrentUserJob = job.email != widget.currentUserEmail;
       return matchTanggal && matchStatus && excludeCurrentUserJob;
     }).toList();
   }
 
-  // Fungsi untuk menghapus pekerjaan dari database dan server
   void hapusPekerjaan(int id) async {
-    bool success =
-        await ApiService.deleteJobFromApi(id); // Menghapus dari server
+    bool success = await ApiService.deleteJobFromApi(id);
     if (success) {
-      await DatabaseHelper.instance
-          .deleteJob(id); // Menghapus dari database lokal
-      ambilPekerjaanDariDB(); // Memperbarui UI setelah data dihapus
+      await DatabaseHelper.instance.deleteJob(id);
+      ambilPekerjaanDariDB();
       print('Pekerjaan dengan id $id berhasil dihapus.');
     } else {
       print('Gagal menghapus pekerjaan dengan id $id dari server.');
     }
-  }
-
-  // Fungsi untuk mengambil pekerjaan dari database
-  void ambilPekerjaanDariDB() async {
-    final dataDariDB = await DatabaseHelper.instance.getJobs();
-    setState(() {
-      widget.job.clear(); // Menghapus data lama
-      widget.job.addAll(dataDariDB); // Menambahkan data baru
-    });
   }
 
   @override
@@ -190,7 +183,7 @@ class _JobListPageState extends State<JobListPage> {
                                   ),
                                 ),
                               );
-                              },
+                            },
                             child: Card(
                               elevation: 3,
                               shape: RoundedRectangleBorder(

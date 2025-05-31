@@ -301,42 +301,6 @@ class _FormPageState extends State<FormPage> {
       print("Jenis Pekerjaan: ${jobBaru.jenisPekerjaan}");
       print("Email: ${jobBaru.email}"); // Log email yang akan dikirim
 
-  //     bool isSuccess = await ApiService.createJob(jobBaru);
-
-  //     setState(() {
-  //       isLoading = false; // Hide loading indicator after request is complete
-  //     });
-
-  //     if (isSuccess) {
-  //       widget.onJobAdded(jobBaru);
-  //       Navigator.pop(context);
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text('Pekerjaan berhasil ditambahkan!')));
-
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => ValidasiPage(
-  //             job: jobBaru,
-  //             onJobAdded: (Job job) {
-  //               widget.onJobAdded(job);
-  //             },
-  //           ),
-  //         ),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //           content: Text('Terjadi kesalahan saat menambahkan pekerjaan!')));
-  //     }
-  //   } else {
-  //     setState(() {
-  //       isLoading = false; // Sembunyikan indikator loading jika validasi gagal
-  //     });
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //         content:
-  //             Text("Pastikan semua field wajib diisi dan gambar 1 dipilih!")));
-  //   }
-  // }
 
       bool isSuccess;
       if (widget.job == null) {

@@ -69,7 +69,7 @@ func SetupRoutes(router *gin.Engine) {
 
 	applicationController := controllers.ApplicationController{}
 	router.POST("/applications", applicationController.CreateApplication)
-	router.GET("/applications", applicationController.GetApplications) // route GET untuk ambil semua aplikasi
+	router.GET("/applications", applicationController.GetApplicationsByJob)
 	router.GET("/applications/check", applicationController.CheckApplication)
 	router.PATCH("/applications/:id", applicationController.UpdateApplicationStatus)
 
