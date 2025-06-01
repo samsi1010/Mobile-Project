@@ -113,18 +113,28 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
   String selectedStatus = statusFilter[selectedFilterIndex];
 
   return pekerjaan.where((job) {
-    bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
-
-    if (selectedStatus == 'Kadaluarsa') {
-      // Tampilkan semua pekerjaan status kadaluarsa, abaikan tanggal
-      return job.status == 'Kadaluarsa';
-    } else {
-      // Untuk status lain, filter berdasarkan tanggal dan status
-      bool matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
-      return matchTanggal && matchStatus;
+    bool matchTanggal = false;
+    try {
+      if (job.tanggal.isNotEmpty) {
+        final jobDate = DateTime.parse(job.tanggal);
+        final selectedDate = DateTime.parse(selectedFullDate);
+        matchTanggal = jobDate.year == selectedDate.year &&
+            jobDate.month == selectedDate.month &&
+            jobDate.day == selectedDate.day;
+      } else {
+        matchTanggal = true;
+      }
+    } catch (e) {
+      matchTanggal = false;
     }
+
+    bool matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
+    bool isUserJob = job.email == widget.userEmail;
+
+    return matchTanggal && matchStatus && isUserJob;
   }).toList();
 }
+
 
 
 
@@ -308,14 +318,14 @@ Widget build(BuildContext context) {
 
     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FormPage(
-              onJobAdded: (newJob) {
-                ambilPekerjaanDariDB();
-              },
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FormPage(
+          onJobAdded: (newJob) {
+            ambilPekerjaanDariDB(); // refresh data setelah upload
+          },
             ),
           ),
         );

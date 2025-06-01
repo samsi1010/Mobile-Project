@@ -68,54 +68,59 @@ class _JobDetailPageState extends State<JobDetailPage> {
               child: Row(
                 children: [
                   Expanded(
-  child: ElevatedButton(
-     onPressed: () {
-    final senderEmail = widget.currentUserEmail;
-    final receiverEmail = widget.job.email;
-    final jobId = widget.job.id;
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final senderEmail = widget.currentUserEmail;
+                        final receiverEmail = widget.job.email;
+                        final jobId = widget.job.id;
 
-    if (senderEmail == receiverEmail) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tidak bisa negosiasi dengan diri sendiri')),
-      );
-      return;
-    }
+                        if (senderEmail == receiverEmail) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Tidak bisa negosiasi dengan diri sendiri')),
+                          );
+                          return;
+                        }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(
-          chatWithEmail: receiverEmail,
-          jobId: jobId,
-        ),
-        ),
-      );
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Color(0xFF9E61EB),
-    ),
-    child: Text(
-      'Lakukan Negosiasi',
-      style: TextStyle(color: Colors.white),
-    ),
-  ),
-),
-
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatPage(
+                              chatWithEmail: receiverEmail,
+                              jobId: jobId,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF9E61EB),
+                      ),
+                      child: Text(
+                        'Lakukan Negosiasi',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
+                        final jobId = widget.job.id;
+                        if (jobId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('ID pekerjaan tidak valid')));
+                          return;
+                        }
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AlasanPekerjaanPage(
+                            builder: (_) => AlasanPekerjaanPage(
+                              jobPostingId: jobId,
+                              userEmail: widget.currentUserEmail,
                               namaPekerjaan: widget.job.namaPekerjaan,
                               harga: 'Rp${widget.job.hargaPekerjaan},00',
                               lamaPengerjaan: widget.job.waktu,
-                              jobPostingId: widget
-                                  .job.id!, // Pastikan id ada dan tidak null
-                              userEmail: widget
-                                  .currentUserEmail, // Pastikan email user tersedia di widget ini
                             ),
                           ),
                         );

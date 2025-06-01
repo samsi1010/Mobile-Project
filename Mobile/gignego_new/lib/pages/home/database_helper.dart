@@ -88,10 +88,17 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+// Hapus semua data pekerjaan di tabel 'pekerjaan'
+  Future<void> clearJobs() async {
+    final db = await instance.database;
+    await db.delete('pekerjaan');
+  }
+
   Future<List<Job>> getJobsByEmail(String email) async {
     final db = await instance.database;
     final result = await db.query('pekerjaan', where: 'email = ?', whereArgs: [email]);
     return result.map((json) => Job.fromMap(json)).toList();
   }
+
 
 }

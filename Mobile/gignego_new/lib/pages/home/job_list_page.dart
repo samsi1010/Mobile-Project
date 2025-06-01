@@ -4,6 +4,7 @@ import 'package:flutter_application/pages/models/job.dart';
 import 'package:flutter_application/pages/home/job_detail_page.dart';
 import 'package:flutter_application/pages/home/database_helper.dart';
 import 'package:flutter_application/pages/home/form_page.dart';
+import 'package:flutter_application/pages/home/job_repository.dart';
 
 class JobListPage extends StatefulWidget {
   final List<Job> job;
@@ -61,6 +62,7 @@ class _JobListPageState extends State<JobListPage> {
   @override
   void initState() {
     super.initState();
+     _loadJobs();
     _scrollController = ScrollController();
 
     listPekerjaan = List<Job>.from(widget.job);
@@ -83,6 +85,21 @@ class _JobListPageState extends State<JobListPage> {
       });
     }
   }
+   Future<void> _loadJobs() async {
+  print('MULAI refreshJobs');
+  await JobRepository.refreshJobs();
+  print('SELESAI refreshJobs');
+
+  final jobsFromDb = await DatabaseHelper.instance.getJobs();
+  print('Jobs dari DB: ${jobsFromDb.length}');
+
+  setState(() {
+    listPekerjaan = jobsFromDb;
+    print('setState listPekerjaan updated dengan ${listPekerjaan.length} data');
+  });
+}
+
+
 
   void ambilPekerjaanDariDB() async {
     final dataDariDB = await DatabaseHelper.instance.getJobs();
@@ -104,18 +121,79 @@ class _JobListPageState extends State<JobListPage> {
     }
   }
 
-  List<Job> _filteredJobs() {
-    String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
-    String selectedStatus = statusFilter[selectedFilterIndex];
+  // List<Job> _filteredJobs() {
+    
+  //   // String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
+  //   // String selectedStatus = statusFilter[selectedFilterIndex];
 
-    return listPekerjaan.where((job) {
-      bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
-      bool matchStatus =
-          selectedStatus == 'Semua' || job.status == selectedStatus;
-      bool excludeCurrentUserJob = job.email != widget.currentUserEmail;
-      return matchTanggal && matchStatus && excludeCurrentUserJob;
-    }).toList();
+  //   // return listPekerjaan.where((job) {
+  //   //   bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
+  //   //   bool matchStatus =
+  //   //       selectedStatus == 'Semua' || job.status == selectedStatus;
+  //   //   bool excludeCurrentUserJob = job.email != widget.currentUserEmail;
+  //   //   return matchTanggal && matchStatus && excludeCurrentUserJob;
+      
+  //   // }).toList();
+  //     return listPekerjaan; // Tampilkan semua data tanpa filter dulu
+  // }
+
+  List<Job> _filteredJobs() {
+  String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
+  String selectedStatus = statusFilter[selectedFilterIndex];
+
+  print('Filter tanggal dipilih: $selectedFullDate');
+  print('Filter status dipilih: $selectedStatus');
+  print('Email user sekarang: ${widget.currentUserEmail}');
+
+  List<Job> filtered = [];
+
+  for (var job in listPekerjaan) {
+    bool matchTanggal = false;
+    bool matchStatus = false;
+    bool excludeCurrentUserJob = false;
+
+    if (job.tanggal.isEmpty) {
+      // Jika tanggal kosong, anggap cocok supaya job tetap tampil
+      matchTanggal = true;
+      print('Job id=${job.id} tanggal kosong, dianggap matchTanggal=true');
+    } else {
+      try {
+        final jobDate = DateTime.parse(job.tanggal);
+        final selectedDate = DateTime.parse(selectedFullDate);
+        matchTanggal = jobDate.year == selectedDate.year &&
+            jobDate.month == selectedDate.month &&
+            jobDate.day == selectedDate.day;
+      } catch (e) {
+        print('Error parsing tanggal job.id=${job.id}: ${job.tanggal}');
+      }
+    }
+
+    matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
+    excludeCurrentUserJob = job.email != widget.currentUserEmail;
+
+    print(
+        'Job id=${job.id} tanggal=${job.tanggal} status=${job.status} email=${job.email}');
+    print(
+        '  matchTanggal=$matchTanggal, matchStatus=$matchStatus, excludeCurrentUserJob=$excludeCurrentUserJob');
+
+    if (matchTanggal && matchStatus && excludeCurrentUserJob) {
+      filtered.add(job);
+    }
   }
+
+  filtered.sort((a, b) {
+    DateTime dateA = DateTime.tryParse(a.tanggal) ?? DateTime(2000);
+    DateTime dateB = DateTime.tryParse(b.tanggal) ?? DateTime(2000);
+    return dateA.compareTo(dateB);
+  });
+
+  print('Jumlah job setelah filter: ${filtered.length}');
+
+  return filtered;
+}
+
+
+
 
   void hapusPekerjaan(int id) async {
     bool success = await ApiService.deleteJobFromApi(id);
