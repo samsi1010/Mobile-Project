@@ -45,54 +45,95 @@ class _PendaftarPageState extends State<PendaftarPage> {
   }
 
   Future<void> loadApplicants() async {
-  setState(() {
-    isLoading = true;
-  });
+    setState(() {
+      isLoading = true;
+    });
 
-  final url = Uri.parse('http://192.168.100.4:8080/applications?job_id=${widget.jobId}');
-  try {
-    final response = await http.get(url);
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    final url = Uri.parse('http://192.168.90.59:8081/applications?job_id=${widget.jobId}');
+    try {
+      final response = await http.get(url);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      try {
-        final Map<String, dynamic> jsonMap = jsonDecode(response.body);
-        final List<dynamic> data = jsonMap['applications'] ?? [];
+      if (response.statusCode == 200) {
+        try {
+          final Map<String, dynamic> jsonMap = jsonDecode(response.body);
+          final List<dynamic> data = jsonMap['applications'] ?? [];
 
+          setState(() {
+            applicants = data.map((item) => Applicant.fromMap(item)).toList();
+            isLoading = false;
+          });
+        } catch (e) {
+          print('Error decoding JSON: $e');
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
         setState(() {
-          applicants = data.map((item) => Applicant.fromMap(item)).toList();
           isLoading = false;
         });
-      } catch (e) {
-        print('Error decoding JSON: $e');
-        setState(() {
-          isLoading = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat pelamar')),
+        );
       }
-    } else {
+    } catch (e) {
+      print('Error fetching applicants: $e');
       setState(() {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat pelamar')),
+        SnackBar(content: Text('Terjadi kesalahan jaringan')),
       );
     }
-  } catch (e) {
-    print('Error fetching applicants: $e');
-    setState(() {
-      isLoading = false;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Terjadi kesalahan jaringan')),
-    );
   }
-}
 
+  // Fungsi untuk mengupdate status pekerjaan menjadi "Proses"
+  Future<void> mulaiPekerjaan() async {
+    final url = Uri.parse('http://192.168.90.59:8081/jobs/${widget.jobId}/status');
+    final response = await http.patch(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'status': 'Proses'}), // Mengirim status "Proses"
+    );
 
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Pekerjaan telah dimulai dan status diubah ke Proses')),
+      );
+      loadApplicants(); // Refresh daftar pelamar setelah status berubah
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengubah status pekerjaan')),
+      );
+    }
+  }
 
+  // Fungsi untuk mengupdate status pekerjaan menjadi "Selesai"
+  Future<void> selesaiPekerjaan() async {
+    final url = Uri.parse('http://192.168.90.59:8081/jobs/${widget.jobId}/status');
+    final response = await http.patch(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'status': 'Selesai'}), // Mengirim status "Selesai"
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Pekerjaan telah selesai dan status diubah ke Selesai')),
+      );
+      loadApplicants(); // Refresh daftar pelamar setelah status berubah
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengubah status pekerjaan')),
+      );
+    }
+  }
+
+  // Fungsi untuk mengupdate status pelamar
   Future<void> updateApplicantStatus(int applicationId, String status) async {
-    final url = Uri.parse('http://192.168.100.4:8080/applications/$applicationId');
+    final url = Uri.parse('http://192.168.90.59:8081/applications/$applicationId');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -103,7 +144,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status pelamar berhasil diperbarui')),
       );
-      await loadApplicants(); // refresh data
+      await loadApplicants(); // Refresh data
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal memperbarui status pelamar')),
@@ -119,43 +160,65 @@ class _PendaftarPageState extends State<PendaftarPage> {
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : applicants.isEmpty
-              ? Center(child: Text('Belum ada pelamar untuk pekerjaan ini'))
-              : ListView.builder(
-                  itemCount: applicants.length,
-                  itemBuilder: (context, index) {
-                    final applicant = applicants[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        title: Text(applicant.userEmail),
-                        subtitle: Text(applicant.alasan),
-                        trailing: applicant.status == 'menunggu'
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.check, color: Colors.green),
-                                    tooltip: 'Terima',
-                                    onPressed: () =>
-                                        updateApplicantStatus(applicant.id, 'diterima'),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.close, color: Colors.red),
-                                    tooltip: 'Tolak',
-                                    onPressed: () =>
-                                        updateApplicantStatus(applicant.id, 'ditolak'),
-                                  ),
-                                ],
-                              )
-                            : Text(
-                                applicant.status[0].toUpperCase() + applicant.status.substring(1),
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                      ),
-                    );
-                  },
-                ),
+          : SingleChildScrollView(  // Use SingleChildScrollView to prevent overflow
+              child: Column(
+                children: applicants.map((applicant) {
+                  return Card(
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      title: Text(applicant.userEmail),
+                      subtitle: Text(applicant.alasan),
+                      trailing: applicant.status == 'menunggu'
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.check, color: Colors.green),
+                                  tooltip: 'Terima',
+                                  onPressed: () => updateApplicantStatus(applicant.id, 'diterima'),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.close, color: Colors.red),
+                                  tooltip: 'Tolak',
+                                  onPressed: () => updateApplicantStatus(applicant.id, 'ditolak'),
+                                ),
+                              ],
+                            )
+                          : applicant.status == 'diterima'
+                              ? Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        // Tombol Mulai untuk pekerjaan yang diterima
+                                        mulaiPekerjaan();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                      ),
+                                      child: Text('Mulai'),
+                                    ),
+                                    SizedBox(height: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        // Tombol Selesai untuk pekerjaan yang sudah dimulai
+                                        selesaiPekerjaan();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                      ),
+                                      child: Text('Selesai'),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  applicant.status[0].toUpperCase() + applicant.status.substring(1),
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
     );
   }
 }

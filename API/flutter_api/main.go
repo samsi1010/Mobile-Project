@@ -14,5 +14,5 @@ func main() {
 
 	routes.SetupRoutes(router)
 
-	router.Run(":8080")
+	router.Run(":8081")
 }

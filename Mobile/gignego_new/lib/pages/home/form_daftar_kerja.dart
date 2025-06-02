@@ -43,7 +43,7 @@ class _AlasanPekerjaanPageState extends State<AlasanPekerjaanPage> {
 
   Future<void> checkIfAlreadyApplied() async {
     final url = Uri.parse(
-        'http://192.168.100.4:8080/applications/check?job_posting_id=${widget.jobPostingId}&user_email=${widget.userEmail}');
+        'http://192.168.90.59:8081/applications/check?job_posting_id=${widget.jobPostingId}&user_email=${widget.userEmail}');
     try {
       final response = await http.get(url);
 
@@ -81,7 +81,7 @@ class _AlasanPekerjaanPageState extends State<AlasanPekerjaanPage> {
       print("Mengirim lamaran dengan job_posting_id: ${widget.jobPostingId}");
   print('Kirim data ke API: ${jsonEncode(data)}');
 
-    final url = Uri.parse('http://192.168.100.4:8080/applications');
+    final url = Uri.parse('http://192.168.90.59:8081/applications');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

@@ -30,7 +30,7 @@ func InitDB() *gorm.DB {
 	dbUser := getEnv("DB_USER", "root")
 	dbPass := getEnv("DB_PASS", "")
 	dbHost := getEnv("DB_HOST", "127.0.0.1")
-	dbPort := getEnv("DB_PORT", "3307")
+	dbPort := getEnv("DB_PORT", "3306")
 	dbName := getEnv("DB_NAME", "gignego")
 
 	// Format Data Source Name (DSN)

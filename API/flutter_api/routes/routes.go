@@ -60,23 +60,27 @@ func SetupRoutes(router *gin.Engine) {
 
 	// Job Posting Routes
 	jobPostingController := controllers.JobPostingController{}
-	router.POST("/job-postings", jobPostingController.CreateJobPosting)     // Menambahkan JobPosting
-	router.GET("/job-postings", jobPostingController.GetJobPostings)        // Mendapatkan semua JobPostings
-	router.GET("/job-postings/:id", jobPostingController.GetJobPostingByID) // Mendapatkan JobPosting berdasarkan ID
-	router.PUT("/job-postings/:id", jobPostingController.UpdateJobPosting)  // Update JobPosting berdasarkan ID
-
+	router.POST("/job-postings", jobPostingController.CreateJobPosting)       // Menambahkan JobPosting
+	router.GET("/job-postings", jobPostingController.GetJobPostings)          // Mendapatkan semua JobPostings
+	router.GET("/job-postings/:id", jobPostingController.GetJobPostingByID)   // Mendapatkan JobPosting berdasarkan ID
+	router.PUT("/job-postings/:id", jobPostingController.UpdateJobPosting)    // Update JobPosting berdasarkan ID
 	router.DELETE("/job-postings/:id", jobPostingController.DeleteJobPosting) // Menghapus JobPosting berdasarkan ID
 
+	// Menambahkan route untuk Update status pekerjaan
+	jobController := controllers.JobController{}
+	router.PATCH("/jobs/:id/status", jobController.UpdateJobStatus) // Menangani update status pekerjaan
+	router.GET("/jobs/:id/status", jobController.GetJobByStatus)    // Menangani mengambil status pekerjaan berdasarkan ID
+
+	// Application Routes
 	applicationController := controllers.ApplicationController{}
 	router.POST("/applications", applicationController.CreateApplication)
 	router.GET("/applications", applicationController.GetApplicationsByJob)
 	router.GET("/applications/check", applicationController.CheckApplication)
 	router.PATCH("/applications/:id", applicationController.UpdateApplicationStatus)
 
+	// Message Routes
 	messageController := controllers.MessageController{}
-
 	router.GET("/messages", messageController.GetMessages)
 	router.POST("/messages", messageController.SendMessage)
 	router.GET("/chatrooms", messageController.GetChatRooms)
-
 }

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_application/pages/models/experience.dart';
 
 class ExperienceService {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'http://localhost:8081';
 
   static Future<bool> addWorkExperience(
     Experience experience, String token) async {

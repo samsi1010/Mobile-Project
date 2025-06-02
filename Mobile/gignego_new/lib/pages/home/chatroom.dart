@@ -44,7 +44,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
   }
 
   Future<List<ChatRoom>> fetchChatRooms(String userEmail) async {
-  final url = Uri.parse('http://192.168.100.4:8080/chatrooms?user_email=$userEmail');
+  final url = Uri.parse('http://192.168.90.59:8081/chatrooms?user_email=$userEmail');
   final response = await http.get(url);
 
   print('Status code: ${response.statusCode}');
