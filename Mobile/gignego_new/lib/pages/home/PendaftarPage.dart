@@ -49,7 +49,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.90.59:8081/applications?job_id=${widget.jobId}');
+    final url = Uri.parse('http://192.168.130.184:8080/applications?job_id=${widget.jobId}');
     try {
       final response = await http.get(url);
       print('Response status: ${response.statusCode}');
@@ -91,7 +91,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
 
   // Fungsi untuk mengupdate status pekerjaan menjadi "Proses"
   Future<void> mulaiPekerjaan() async {
-    final url = Uri.parse('http://192.168.90.59:8081/jobs/${widget.jobId}/status');
+    final url = Uri.parse('http://192.168.130.184:8080/jobs/${widget.jobId}/status');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -112,7 +112,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
 
   // Fungsi untuk mengupdate status pekerjaan menjadi "Selesai"
   Future<void> selesaiPekerjaan() async {
-    final url = Uri.parse('http://192.168.90.59:8081/jobs/${widget.jobId}/status');
+    final url = Uri.parse('http://192.168.130.184:8080/jobs/${widget.jobId}/status');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -133,7 +133,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
 
   // Fungsi untuk mengupdate status pelamar
   Future<void> updateApplicantStatus(int applicationId, String status) async {
-    final url = Uri.parse('http://192.168.90.59:8081/applications/$applicationId');
+    final url = Uri.parse('http://192.168.130.184:8080/applications/$applicationId');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},

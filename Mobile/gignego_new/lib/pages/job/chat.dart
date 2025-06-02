@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/pages/job/models/message.dart';
+import 'package:flutter_application/pages/job/models/message2.dart';
 
 class ChatPage extends StatefulWidget {
   final String currentUserId;

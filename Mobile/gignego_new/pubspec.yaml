@@ -47,6 +47,7 @@ dependencies:
   path: ^1.8.3
   timeago: ^3.3.0
   sqflite: ^2.0.0+4
+  flutter_svg: ^1.0.0
   smooth_page_indicator: ^1.0.0
 
 
@@ -90,6 +91,7 @@ flutter:
   - assets/Fb.png
   - assets/add.png
   - assets/Chat.png
+  - assets/gignego.svg
   - assets/Elektronik.png
   - assets/His.png
   - assets/Rmh.png

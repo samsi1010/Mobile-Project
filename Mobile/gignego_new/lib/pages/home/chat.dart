@@ -92,7 +92,7 @@ if (widget.jobId == null) {
 }
 
     final url = Uri.parse(
-      'http://192.168.90.59:8081/messages?user1=$currentUserEmail&user2=${widget.chatWithEmail}&job_id=${widget.jobId}',
+      'http://192.168.130.184:8080/messages?user1=$currentUserEmail&user2=${widget.chatWithEmail}&job_id=${widget.jobId}',
     );
 
     try {
@@ -129,7 +129,7 @@ if (widget.jobId == null) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final url = Uri.parse('http://192.168.90.59:8081/messages');
+    final url = Uri.parse('http://192.168.130.184:8080/messages');
     try {
       final response = await http.post(
         url,
