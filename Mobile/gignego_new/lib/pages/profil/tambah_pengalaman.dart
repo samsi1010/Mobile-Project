@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart'; // Import untuk format tanggal
+import 'package:http/http.dart' as http; // Import untuk request HTTP
+import 'dart:convert'; // Import untuk encoding JSON
 
 class TambahPengalamanPage extends StatefulWidget {
   @override
@@ -11,6 +13,15 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
   bool _masihBekerja = false;
   DateTime? _tanggalMulai;
   DateTime? _tanggalBerakhir;
+
+  // Field controllers
+  final TextEditingController posisiController = TextEditingController();
+  final TextEditingController perusahaanController = TextEditingController();
+  final TextEditingController negaraController = TextEditingController();
+  final TextEditingController kotaController = TextEditingController();
+  final TextEditingController fungsiController = TextEditingController();
+  final TextEditingController industriController = TextEditingController();
+  final TextEditingController deskripsiController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final DateTime? picked = await showDatePicker(
@@ -30,6 +41,65 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
     }
   }
 
+  // Fungsi untuk mengirim data pengalaman kerja ke API
+  Future<void> _submitExperience() async {
+    if (_formKey.currentState!.validate()) {
+      // Mengambil data yang dimasukkan
+      final posisi = posisiController.text;
+      final perusahaan = perusahaanController.text;
+      final negara = negaraController.text;
+      final kota = kotaController.text;
+      final fungsi = fungsiController.text;
+      final industri = industriController.text;
+      final deskripsi = deskripsiController.text;
+
+      // Memastikan semua field diisi
+      if (posisi.isEmpty || perusahaan.isEmpty || negara.isEmpty || kota.isEmpty || fungsi.isEmpty || industri.isEmpty || deskripsi.isEmpty || _tanggalMulai == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Semua field wajib diisi')),
+        );
+        return;
+      }
+
+      // Mengirim data ke API
+      try {
+        final response = await http.post(
+          Uri.parse('http://192.168.34.59:8081/work-experiences'), // Ganti dengan URL API Anda
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'position': posisi,
+            'company_name': perusahaan,
+            'country': negara,
+            'city': kota,
+            'start_date': DateFormat('yyyy-MM-dd').format(_tanggalMulai!),
+            'end_date': _masihBekerja ? null : DateFormat('yyyy-MM-dd').format(_tanggalBerakhir ?? DateTime.now()),
+            'is_current': _masihBekerja,
+            'job_function': fungsi,
+            'industry': industri,
+            'description': deskripsi,
+          }),
+        );
+
+        if (response.statusCode == 201) {
+          // Data berhasil disimpan
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Pengalaman Kerja berhasil disimpan')),
+          );
+          Navigator.pop(context); // Kembali ke halaman sebelumnya
+        } else {
+          // Jika gagal
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal menyimpan data pengalaman kerja')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,10 +110,7 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Tambah Pengalaman Kerja',
-          style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
-        ),
+        title: Text('Tambah Pengalaman Kerja', style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -53,37 +120,17 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildTextField('Posisi Pekerjaan*'),
-                _buildTextField('Nama Perusahaan*'),
+                _buildTextField('Posisi Pekerjaan*', controller: posisiController),
+                _buildTextField('Nama Perusahaan*', controller: perusahaanController),
                 Row(
                   children: [
-                    Expanded(child: _buildDropdown('Negara*')),
+                    Expanded(child: _buildTextField('Negara*', controller: negaraController)),
                     SizedBox(width: 10),
-                    Expanded(child: _buildDropdown('Kota*')),
+                    Expanded(child: _buildTextField('Kota*', controller: kotaController)),
                   ],
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDateField(
-                        'Tanggal Mulai*',
-                        _tanggalMulai,
-                        () => _selectDate(context, true),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDateField(
-                        'Tanggal Berakhir (atau ekspetasi)',
-                        _tanggalBerakhir,
-                        _masihBekerja ? null : () => _selectDate(context, false),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildDateField('Tanggal Mulai*', _tanggalMulai, () => _selectDate(context, true)),
+                _buildDateField('Tanggal Berakhir (atau ekspetasi)', _tanggalBerakhir, _masihBekerja ? null : () => _selectDate(context, false)),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text('Saya masih bekerja di sini'),
@@ -95,47 +142,29 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
                     });
                   },
                 ),
-                _buildDropdown('Fungsi Pekerjaan*'),
-                _buildDropdown('Industri Perusahaan*'),
-                Row(
-                  children: [
-                    Expanded(child: _buildDropdown('Level Pekerjaan*')),
-                    SizedBox(width: 10),
-                    Expanded(child: _buildDropdown('Tipe Pekerjaan*')),
-                  ],
-                ),
-                _buildTextField('Deskripsi Pekerjaan*', maxLines: 5),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Tulis tugas dan tanggung jawab atau pencapaianmu selama bekerja di sini',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ),
+                _buildTextField('Fungsi Pekerjaan*', controller: fungsiController),
+                _buildTextField('Industri Perusahaan*', controller: industriController),
+                _buildTextField('Deskripsi Pekerjaan*', controller: deskripsiController, maxLines: 5),
                 SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.purple),
-                        ),
+                        style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.purple)),
                         child: Text('Batal', style: TextStyle(color: Colors.purple)),
                       ),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                        ),
+                        onPressed: _submitExperience, // Simpan pengalaman kerja
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
                         child: Text('Simpan', style: TextStyle(color: Colors.black45)),
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -144,34 +173,16 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
     );
   }
 
-  Widget _buildTextField(String label, {int maxLines = 1}) {
+  Widget _buildTextField(String label, {TextEditingController? controller, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
+        controller: controller,
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
-        ),
-        items: ['Item 1', 'Item 2'].map((item) {
-          return DropdownMenuItem(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-        onChanged: (val) {},
       ),
     );
   }

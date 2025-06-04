@@ -52,8 +52,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+<<<<<<< Updated upstream
   Future<Map<String, dynamic>?> _loginUser(String email, String password) async {
     final url = Uri.parse('http://192.168.130.184:8080/login');
+=======
+  Future<Map<String, dynamic>?> _loginUser(
+      String email, String password) async {
+    final url = Uri.parse('http://192.168.34.59:8081/login');
+>>>>>>> Stashed changes
     try {
       final response = await http.post(
         url,

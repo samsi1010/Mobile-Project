@@ -53,7 +53,6 @@ class _JobListPageState extends State<JobListPage> {
   }
 
   final List<String> statusFilter = [
-    'Semua',
     'Tersedia',
     'Proses',
     'Selesai',
@@ -62,7 +61,7 @@ class _JobListPageState extends State<JobListPage> {
   @override
   void initState() {
     super.initState();
-    //  _loadJobs();
+     _loadJobs();
     _scrollController = ScrollController();
 
     listPekerjaan = List<Job>.from(widget.job);
@@ -85,7 +84,7 @@ class _JobListPageState extends State<JobListPage> {
       });
     }
   }
-   Future<void> _loadJobs() async {
+  Future<void> _loadJobs() async {
   print('MULAI refreshJobs');
   await JobRepository.refreshJobs();
   print('SELESAI refreshJobs');
@@ -94,12 +93,11 @@ class _JobListPageState extends State<JobListPage> {
   print('Jobs dari DB: ${jobsFromDb.length}');
 
   setState(() {
-    listPekerjaan = jobsFromDb;
+    // Menambahkan data yang baru di-refresh tanpa menghapus data yang lama
+    listPekerjaan.addAll(jobsFromDb);
     print('setState listPekerjaan updated dengan ${listPekerjaan.length} data');
   });
 }
-
-
 
   void ambilPekerjaanDariDB() async {
     final dataDariDB = await DatabaseHelper.instance.getJobs();
@@ -121,79 +119,85 @@ class _JobListPageState extends State<JobListPage> {
     }
   }
 
-  List<Job> _filteredJobs() {
+  // List<Job> _filteredJobs() {
     
-    String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
-    String selectedStatus = statusFilter[selectedFilterIndex];
+  //   String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
+  //   String selectedStatus = statusFilter[selectedFilterIndex];
 
-    return listPekerjaan.where((job) {
-      bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
-      bool matchStatus =
-          selectedStatus == 'Semua' || job.status == selectedStatus;
-      bool excludeCurrentUserJob = job.email != widget.currentUserEmail;
-      return matchTanggal && matchStatus && excludeCurrentUserJob;
+  //   return listPekerjaan.where((job) {
+  //     bool matchTanggal = isSameDate(job.tanggal, selectedFullDate);
+  //     bool matchStatus =
+  //         selectedStatus == 'Semua' || job.status == selectedStatus;
+  //     bool excludeCurrentUserJob = job.email != widget.currentUserEmail;
+  //     return matchTanggal && matchStatus && excludeCurrentUserJob;
       
-    }).toList();
-  //     return listPekerjaan; // Tampilkan semua data tanpa filter dulu
+  //   }).toList();
+  // //     return listPekerjaan; // Tampilkan semua data tanpa filter dulu
+  // }
+
+List<Job> _filteredJobs() {
+  String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
+  String selectedStatus = statusFilter[selectedFilterIndex];
+
+  List<Job> filtered = [];
+
+  for (var job in listPekerjaan) {
+    bool matchTanggal = true; // Coba periksa tanggal dengan lebih luwes
+    bool matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
+    
+    if (selectedFullDate.isNotEmpty) {
+      try {
+        final jobDate = DateTime.parse(job.tanggal);
+        final selectedDate = DateTime.parse(selectedFullDate);
+        matchTanggal = jobDate.year == selectedDate.year &&
+            jobDate.month == selectedDate.month &&
+            jobDate.day == selectedDate.day;
+      } catch (e) {
+        matchTanggal = true; // Jika tanggal kosong atau tidak valid, tampilkan saja
+      }
+    }
+
+    if (matchTanggal && matchStatus) {
+      filtered.add(job);
+    }
   }
 
-//  List<Job> _filteredJobs() {
-//   String selectedFullDate = tanggalList[selectedDateIndex]['fullDate'] ?? '';
-//   String selectedStatus = statusFilter[selectedFilterIndex];
+  return filtered;
+}
 
-//   print('Filter tanggal dipilih: $selectedFullDate');
-//   print('Filter status dipilih: $selectedStatus');
-//   print('Email user sekarang: ${widget.currentUserEmail}');
+Widget _buildFilterStatus() {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    padding: EdgeInsets.symmetric(horizontal: 12),
+    child: Row(
+      children: List.generate(statusFilter.length, (index) {
+        final selected = selectedFilterIndex == index;
+        return GestureDetector(
+          onTap: () => setState(() => selectedFilterIndex = index),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 6),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected ? Color(0xFFB599EC) : Color(0xFFF3E9FF),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusFilter[index],
+              style: TextStyle(
+                fontSize: 14,
+                color: selected ? Colors.white : Colors.black54,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }),
+    ),
+  );
+}
 
-//   List<Job> filtered = [];
 
-//   for (var job in listPekerjaan) {
-//     bool matchTanggal = false;
-//     bool matchStatus = false;
-//     bool excludeCurrentUserJob = false;
 
-//     // Periksa apakah tanggal pekerjaan cocok dengan yang dipilih
-//     if (job.tanggal.isEmpty) {
-//       // Jika tanggal kosong, anggap cocok supaya job tetap tampil
-//       matchTanggal = true;
-//       print('Job id=${job.id} tanggal kosong, dianggap matchTanggal=true');
-//     } else {
-//       try {
-//         final jobDate = DateTime.parse(job.tanggal);
-//         final selectedDate = DateTime.parse(selectedFullDate);
-//         matchTanggal = jobDate.year == selectedDate.year &&
-//             jobDate.month == selectedDate.month &&
-//             jobDate.day == selectedDate.day;
-//       } catch (e) {
-//         print('Error parsing tanggal job.id=${job.id}: ${job.tanggal}');
-//       }
-//     }
-
-//     // Memastikan status yang dipilih cocok dengan status pekerjaan
-//     matchStatus = selectedStatus == 'Semua' || job.status == selectedStatus;
-//     excludeCurrentUserJob = job.email != widget.currentUserEmail;
-
-//     print(
-//         'Job id=${job.id} tanggal=${job.tanggal} status=${job.status} email=${job.email}');
-//     print(
-//         '  matchTanggal=$matchTanggal, matchStatus=$matchStatus, excludeCurrentUserJob=$excludeCurrentUserJob');
-
-//     if (matchTanggal && matchStatus && excludeCurrentUserJob) {
-//       filtered.add(job);
-//     }
-//   }
-
-//   // Urutkan hasil filter berdasarkan tanggal pekerjaan
-//   filtered.sort((a, b) {
-//     DateTime dateA = DateTime.tryParse(a.tanggal) ?? DateTime(2000);
-//     DateTime dateB = DateTime.tryParse(b.tanggal) ?? DateTime(2000);
-//     return dateA.compareTo(dateB);
-//   });
-
-//   print('Jumlah job setelah filter: ${filtered.length}');
-
-//   return filtered;
-// }
 
 
 
@@ -347,34 +351,34 @@ class _JobListPageState extends State<JobListPage> {
     );
   }
 
-  Widget _buildFilterStatus() {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    padding: EdgeInsets.symmetric(horizontal: 12),
-    child: Row(
-      children: List.generate(statusFilter.length, (index) {
-        final selected = selectedFilterIndex == index;
-        return GestureDetector(
-          onTap: () => setState(() => selectedFilterIndex = index),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 6),
-            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: selected ? Color(0xFFB599EC) : Color(0xFFF3E9FF),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              statusFilter[index],
-              style: TextStyle(
-                fontSize: 14,
-                color: selected ? Colors.white : Colors.black54,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        );
-      }),
-    ),
-  );
-}
+//   Widget _buildFilterStatus() {
+//   return SingleChildScrollView(
+//     scrollDirection: Axis.horizontal,
+//     padding: EdgeInsets.symmetric(horizontal: 12),
+//     child: Row(
+//       children: List.generate(statusFilter.length, (index) {
+//         final selected = selectedFilterIndex == index;
+//         return GestureDetector(
+//           onTap: () => setState(() => selectedFilterIndex = index),
+//           child: Container(
+//             margin: EdgeInsets.symmetric(horizontal: 6),
+//             padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+//             decoration: BoxDecoration(
+//               color: selected ? Color(0xFFB599EC) : Color(0xFFF3E9FF),
+//               borderRadius: BorderRadius.circular(20),
+//             ),
+//             child: Text(
+//               statusFilter[index],
+//               style: TextStyle(
+//                 fontSize: 14,
+//                 color: selected ? Colors.white : Colors.black54,
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//           ),
+//         );
+//       }),
+//     ),
+//   );
+// }
 }

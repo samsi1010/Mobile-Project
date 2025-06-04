@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfilPage extends StatefulWidget {
   @override
@@ -7,9 +8,11 @@ class EditProfilPage extends StatefulWidget {
 
 class _EditProfilPageState extends State<EditProfilPage> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController tanggalController = TextEditingController();
-  TextEditingController alamatLengkapController = TextEditingController();
+  TextEditingController namaController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   TextEditingController noTelpController = TextEditingController();
+  TextEditingController alamatLengkapController = TextEditingController();
+  TextEditingController tanggalController = TextEditingController();
 
   String? selectedKecamatan;
   String? selectedDesa;
@@ -23,130 +26,153 @@ class _EditProfilPageState extends State<EditProfilPage> {
     'Borbor': ['Borbor Tonga', 'Parsaoran'],
     'Silaen': ['Lumban Sitorus', 'Lumban Holbung'],
     'Ajibata': ['Ajibata', 'Parparean', 'Tanjung Unta'],
-    // Tambahkan kecamatan dan desa lainnya sesuai kebutuhan
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData(); // Memuat data pengguna dari SharedPreferences
+  }
+
+  // Fungsi untuk memuat data profil pengguna dari SharedPreferences
+  Future<void> _loadProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Mengambil data profil dari SharedPreferences dan mengisi controller dengan data yang ada
+    namaController.text = prefs.getString('user_name') ?? '';
+    emailController.text = prefs.getString('user_email') ?? '';
+    noTelpController.text = prefs.getString('user_phone') ?? '';
+    alamatLengkapController.text = prefs.getString('user_address') ?? '';
+    tanggalController.text = prefs.getString('user_birthdate') ?? '';
+
+    // Jika perlu, bisa menambahkan logika untuk mengambil Kecamatan dan Desa
+    setState(() {
+      selectedKecamatan = prefs.getString('user_kecamatan');
+      selectedDesa = prefs.getString('user_desa');
+    });
+  }
+
+  // Fungsi untuk menyimpan data yang sudah diedit
+  Future<void> _saveProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Menyimpan data yang sudah diedit ke SharedPreferences
+    prefs.setString('user_name', namaController.text);
+    prefs.setString('user_email', emailController.text);
+    prefs.setString('user_phone', noTelpController.text);
+    prefs.setString('user_address', alamatLengkapController.text);
+    prefs.setString('user_birthdate', tanggalController.text);
+    prefs.setString('user_kecamatan', selectedKecamatan ?? '');
+    prefs.setString('user_desa', selectedDesa ?? '');
+
+    // Tampilkan snackbar atau konfirmasi untuk memberitahukan pengguna
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Profil berhasil disimpan!'),
+    ));
+
+    // Kembali ke halaman ProfilPage setelah menyimpan data
+    Navigator.pop(context); // Kembali ke halaman sebelumnya (ProfilPage)
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(20),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Edit Profil',
+          style: TextStyle(
+            color: Colors.purple,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Cancel", style: TextStyle(color: Colors.grey)),
+              // Nama Field
+              buildTextField("Nama", controller: namaController),
+
+              // Email Field
+              buildTextField("Email", controller: emailController),
+
+              // Kecamatan Dropdown
+              DropdownButtonFormField<String>(
+                value: selectedKecamatan,
+                decoration: InputDecoration(
+                  labelText: 'Kecamatan',
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF7C4CB8)),
                   ),
-                  Text("Edit Profil", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("GIGNEGO",
-                      style: TextStyle(color: Color(0xFF7C4CB8), fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(height: 20),
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage: AssetImage("assets/profile.jpg"),
-                  ),
-                  CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 16,
-                    child: Icon(Icons.edit, color: Color(0xFF7C4CB8), size: 18),
-                  )
-                ],
-              ),
-              SizedBox(height: 20),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    buildTextField("Nama"),
-                    buildTextField("Email"),
-                    DropdownButtonFormField<String>(
-                      value: selectedKecamatan,
-                      decoration: InputDecoration(
-                        labelText: 'Kecamatan',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                        ),
-                      ),
-                      items: dataWilayah.keys
-                          .map((kec) => DropdownMenuItem(value: kec, child: Text(kec)))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedKecamatan = value;
-                          selectedDesa = null;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    DropdownButtonFormField<String>(
-                      value: selectedDesa,
-                      decoration: InputDecoration(
-                        labelText: 'Desa',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                        ),
-                      ),
-                      items: (selectedKecamatan != null)
-                          ? dataWilayah[selectedKecamatan]!
-                              .map((desa) => DropdownMenuItem(value: desa, child: Text(desa)))
-                              .toList()
-                          : [],
-                      onChanged: (value) {
-                        setState(() {
-                          selectedDesa = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: alamatLengkapController,
-                      decoration: InputDecoration(
-                        labelText: "Alamat Lengkap",
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: noTelpController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: "Nomor Telepon",
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    buildTextField("Pekerjaan", isDropdown: true),
-                    buildDatePicker("Tanggal Lahir*"),
-                  ],
                 ),
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  // simpan data di sini
+                items: dataWilayah.keys
+                    .map((kec) => DropdownMenuItem(value: kec, child: Text(kec)))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedKecamatan = value;
+                    selectedDesa = null; // Reset desa when kecamatan is changed
+                  });
                 },
+              ),
+
+              // Desa Dropdown
+              DropdownButtonFormField<String>(
+                value: selectedDesa,
+                decoration: InputDecoration(
+                  labelText: 'Desa',
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF7C4CB8)),
+                  ),
+                ),
+                items: (selectedKecamatan != null)
+                    ? dataWilayah[selectedKecamatan]!
+                        .map((desa) => DropdownMenuItem(value: desa, child: Text(desa)))
+                        .toList()
+                    : [],
+                onChanged: (value) {
+                  setState(() {
+                    selectedDesa = value;
+                  });
+                },
+              ),
+
+              // Alamat Lengkap Field
+              buildTextField("Alamat Lengkap", controller: alamatLengkapController),
+
+              // Nomor Telepon Field
+              buildTextField("Nomor Telepon", controller: noTelpController),
+
+              // Tanggal Lahir Field
+              buildDatePicker(),
+
+              SizedBox(height: 30),
+              // Save Button
+              ElevatedButton(
+                onPressed: _saveProfileData,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFBB86FC),
+                  backgroundColor: Color(0xFFCD50F3),
                   minimumSize: Size(double.infinity, 45),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                 ),
-                child: Text("Simpan", style: TextStyle(fontWeight: FontWeight.bold)),
+                 child: Text(
+    "Simpan", 
+    style: TextStyle(
+      fontWeight: FontWeight.bold, 
+      color: Colors.white, 
               ),
+                 ),
+              )
             ],
           ),
         ),
@@ -154,43 +180,31 @@ class _EditProfilPageState extends State<EditProfilPage> {
     );
   }
 
-  Widget buildTextField(String label, {bool isDropdown = false}) {
+  // Reusable TextFormField
+  Widget buildTextField(String label, {TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: isDropdown
-          ? DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: label,
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                ),
-              ),
-              items: ["Freelancer", "Mahasiswa", "Pekerja Tetap"]
-                  .map((job) => DropdownMenuItem(value: job, child: Text(job)))
-                  .toList(),
-              onChanged: (value) {},
-            )
-          : TextFormField(
-              decoration: InputDecoration(
-                labelText: label,
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF7C4CB8)),
-                ),
-              ),
-            ),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF7C4CB8)),
+          ),
+        ),
+      ),
     );
   }
 
-  Widget buildDatePicker(String label) {
+  // Date Picker Field for Date of Birth
+  Widget buildDatePicker() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextFormField(
         controller: tanggalController,
         readOnly: true,
         decoration: InputDecoration(
-          labelText: label,
+          labelText: "Tanggal Lahir",
           suffixIcon: Icon(Icons.calendar_today),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Color(0xFF7C4CB8)),

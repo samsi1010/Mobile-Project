@@ -4,11 +4,32 @@ import 'package:flutter_application/pages/profil/ubah_nomor.dart';
 import 'package:flutter_application/pages/profil/ubah_password.dart';
 import 'package:flutter_application/pages/profil/nonaktif_akun.dart';
 import 'package:flutter_application/pages/profil/hapus_akun.dart';
-// import 'package:flutter_application/pages/profil/login.dart'; // untuk logout redirect harusnya loginnya punya si sam
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/auth/login.dart';
 
-class SettingPage extends StatelessWidget {
-  const SettingPage({Key? key}) : super(key: key);
+class SettingPage extends StatefulWidget {
+  @override
+  _SettingPageState createState() => _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
+  String _userEmail = '';
+  String _userPhone = '';
+
+  // Fungsi untuk mengambil data user dari SharedPreferences
+  Future<void> _getUserDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userEmail = prefs.getString('user_email') ?? 'Email tidak tersedia';
+      _userPhone = prefs.getString('user_phone') ?? 'Nomor tidak tersedia';
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserDetails();  // Memanggil fungsi untuk mendapatkan data user saat halaman dibuka
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +74,8 @@ class SettingPage extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.email_outlined, color: Colors.purple),
               title: const Text("Email", style: TextStyle(color: Colors.black)),
-              subtitle: const Text("yenny@gmail.com"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UbahEmailPage()),
-                );
-              },
+              subtitle: Text(_userEmail), // Menampilkan email yang diambil
+              
             ),
             Divider(),
 
@@ -69,18 +84,12 @@ class SettingPage extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.phone_android, color: Colors.purple),
               title: const Text("Nomor Ponsel", style: TextStyle(color: Colors.black)),
-              subtitle: const Text("085760360010"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UbahNomorPage()),
-                );
-              },
+              subtitle: Text(_userPhone), // Menampilkan nomor telepon yang diambil
+              
             ),
             Divider(),
 
-            // Password
+            // Password, Nonaktif Akun, Hapus Akun tetap sama
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.lock_outline, color: Colors.purple),
@@ -93,24 +102,9 @@ class SettingPage extends StatelessWidget {
                 );
               },
             ),
+            
             Divider(),
 
-            // Nonaktif Akun
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_off_outlined, color: Colors.purple),
-              title: const Text("Nonaktif Akun", style: TextStyle(color: Colors.black)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NonaktifAkunPage()),
-                );
-              },
-            ),
-            Divider(),
-
-            // Hapus Akun
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.delete_forever_outlined, color: Colors.purple),

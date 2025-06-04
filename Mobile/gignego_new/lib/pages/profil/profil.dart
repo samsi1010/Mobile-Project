@@ -1,41 +1,107 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/pages/profil/edit_profil.dart';
-import 'package:flutter_application/pages/profil/setingan.dart';
-import 'package:flutter_application/pages/profil/tambah_pengalaman.dart';
-import 'package:flutter_application/pages/profil/tambah_pendidikan.dart';
-import 'package:flutter_application/pages/profil/tambah_skill.dart';
-import 'package:flutter_application/pages/profil/tambah_cv.dart';
-import 'package:flutter_application/pages/profil/tambah_pertanyaan.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'edit_profil.dart';  // Import untuk halaman EditProfilPage
+import 'tambah_pengalaman.dart';  // Import untuk halaman TambahPengalamanPage
+import 'tambah_pendidikan.dart';  // Import untuk halaman TambahPendidikanPage
+import 'tambah_skill.dart';  // Import untuk halaman TambahSkillPage
+import 'tambah_cv.dart';  // Import untuk halaman TambahCVPage
+import 'tambah_pertanyaan.dart';  // Import untuk halaman TambahPertanyaanPage
+import 'setingan.dart';  // Import untuk halaman SettingPage
 import 'package:flutter_application/pages/home/CustomBottomNavBar.dart';
+import 'package:flutter_application/pages/home/form_page.dart';
+import 'package:flutter_application/pages/models/job.dart';
+import 'package:flutter_application/pages/home/database_helper.dart';
+
 
 class ProfilPage extends StatefulWidget {
   @override
   _ProfilPageState createState() => _ProfilPageState();
 }
+
 class _ProfilPageState extends State<ProfilPage> {
+  List<Job> pekerjaan = [];
+  String? currentUserEmail;
+  String? _userName; // Variabel untuk menyimpan nama pengguna
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName(); // Memuat nama pengguna saat halaman dimulai
+    loadCurrentUserEmail(); // Memuat email pengguna saat halaman dimulai
+  }
+
+  // Fungsi untuk memuat nama pengguna dari SharedPreferences
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userName = prefs.getString('user_name');  // Mengambil nama pengguna
+    setState(() {
+      _userName = userName ?? 'User';  // Jika tidak ada nama, gunakan 'User'
+    });
+  }
+
+  // Fungsi untuk memuat email pengguna dari SharedPreferences
+  Future<void> loadCurrentUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('user_email');
+    setState(() {
+      currentUserEmail = email;
+    });
+    // Baru ambil pekerjaan setelah email didapat
+    ambilPekerjaanDariDB();
+  }
+
+  void ambilPekerjaanDariDB() async {
+    final dataDariDB = await DatabaseHelper.instance.getJobs();
+
+    setState(() {
+      // Filter pekerjaan, kecuali pekerjaan yang emailnya sama dengan currentUserEmail
+      pekerjaan = dataDariDB.where((job) => job.email != currentUserEmail).toList();
+    });
+  }
+
+  void tambahPekerjaan(Job job) async {
+    // Cek apakah pekerjaan sudah ada dalam database
+    final pekerjaanExist =
+        await DatabaseHelper.instance.checkIfJobExists(job.namaPekerjaan);
+
+    if (pekerjaanExist) {
+      print("Pekerjaan sudah ada, tidak perlu ditambahkan");
+    } else {
+      await DatabaseHelper.instance
+          .insertJob(job); // Menambahkan pekerjaan baru
+      ambilPekerjaanDariDB(); // Refresh data setelah insert
+      print('Pekerjaan baru berhasil ditambahkan dan data di-refresh');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       bottomNavigationBar: CustomBottomNavBar(
-      currentIndex: 3,
-      currentUserEmail: null, // atau dapatkan dari shared prefs jika perlu
-    ),floatingActionButton: FloatingActionButton(
-  onPressed: () {
-    // Fungsi FAB sama seperti di home, misal navigasi ke FormPage
-  },
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  highlightElevation: 0,
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-  child: Image.asset(
-    'assets/add.png',
-    width: 60,
-    height: 60,
-  ),
-),
-floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
+        currentIndex: 3, // Menandakan ini adalah halaman profil
+        currentUserEmail: currentUserEmail ?? 'user@example.com', // Ganti dengan email yang sesuai
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('Navigasi ke FormPage');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FormPage(onJobAdded: tambahPekerjaan),
+            ),
+          );
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        highlightElevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        child: Image.asset(
+          'assets/add.png',
+          width: 60,
+          height: 60,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -56,32 +122,29 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(30)),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
                         SizedBox(height: 40),
-                        Text("User",
+                        // Gantikan "User" dengan nama yang diambil dari SharedPreferences
+                        Text(_userName ?? 'User',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold)),
                         Text("Profil Belum Lengkap",
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 14)),
+                            style: TextStyle(color: Colors.white70, fontSize: 14)),
                         Text("Last Update: 20 Maret 2025",
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 12)),
+                            style: TextStyle(color: Colors.white70, fontSize: 12)),
                         SizedBox(height: 10),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => EditProfilPage()),
+                              MaterialPageRoute(builder: (context) => EditProfilPage()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -91,66 +154,63 @@ floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          child: Text("Edit Profil",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text("Edit Profil", style: TextStyle(color: Colors.white)),
                         ),
                         ProfileSection(
-                            icon: Icons.business_center,
-                            title: "Pengalaman Kerja",
-                            buttonText: "Tambah Pengalaman Kerja",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        TambahPengalamanPage()),
-                              );
-                            }),
+                          icon: Icons.business_center,
+                          title: "Pengalaman Kerja",
+                          buttonText: "Tambah Pengalaman Kerja",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TambahPengalamanPage()),
+                            );
+                          },
+                        ),
                         ProfileSection(
-                            icon: Icons.school,
-                            title: "Pendidikan",
-                            buttonText: "Tambah Pendidikan",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TambahPendidikanPage()),
-                              );
-                            }),
+                          icon: Icons.school,
+                          title: "Pendidikan",
+                          buttonText: "Tambah Pendidikan",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TambahPendidikanPage()),
+                            );
+                          },
+                        ),
                         ProfileSection(
-                            icon: Icons.build,
-                            title: "Skill",
-                            buttonText: "Tambah Skill",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TambahSkillPage()),
-                              );
-                            }),
+                          icon: Icons.build,
+                          title: "Skill",
+                          buttonText: "Tambah Skill",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TambahSkillPage()),
+                            );
+                          },
+                        ),
                         ProfileSection(
-                            icon: Icons.description,
-                            title: "CV",
-                            buttonText: "Tambah CV",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TambahCVPage()),
-                              );
-                            }),
+                          icon: Icons.description,
+                          title: "CV",
+                          buttonText: "Tambah CV",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TambahCVPage()),
+                            );
+                          },
+                        ),
                         ProfileSection(
-                            icon: Icons.help_outline,
-                            title: "Butuh Bantuan",
-                            buttonText: "Tambah Pertanyaan",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        TambahPertanyaanPage()),
-                              );
-                            }),
+                          icon: Icons.help_outline,
+                          title: "Butuh Bantuan",
+                          buttonText: "Tambah Pertanyaan",
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TambahPertanyaanPage()),
+                            );
+                          },
+                        ),
                         SizedBox(height: 20),
                       ],
                     ),
@@ -243,75 +303,6 @@ class ProfileSection extends StatelessWidget {
                     color: Color(0xFF054DC0), fontWeight: FontWeight.bold)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class BottomNavBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      shape: CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10),
-        height: 70,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-                icon: Image.asset("assets/home.png", width: 30, height: 30),
-                onPressed: () {}),
-            IconButton(
-                icon: Image.asset("assets/obrolan.png", width: 30, height: 30),
-                onPressed: () {}),
-            SizedBox(width: 40),
-            IconButton(
-                icon:
-                    Image.asset("assets/aktivitas.png", width: 30, height: 30),
-                onPressed: () {}),
-            IconButton(
-                icon: Image.asset("assets/profil.png", width: 30, height: 30),
-                onPressed: () {}),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CustomFAB extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: SweepGradient(
-          colors: [
-            Color(0xFF2979FF),
-            Color(0xFF80BF80),
-            Color(0xFF15AFFF),
-            Color(0xFF00E5FF),
-            Color(0xFFFF9800),
-            Color(0xFF2979FF),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Icon(Icons.add, color: Colors.black, size: 30),
-          ),
-        ),
       ),
     );
   }

@@ -92,7 +92,11 @@ if (widget.jobId == null) {
 }
 
     final url = Uri.parse(
+<<<<<<< Updated upstream
       'http://192.168.130.184:8080/messages?user1=$currentUserEmail&user2=${widget.chatWithEmail}&job_id=${widget.jobId}',
+=======
+      'http://192.168.34.59:8081/messages?user1=$currentUserEmail&user2=${widget.chatWithEmail}&job_id=${widget.jobId}',
+>>>>>>> Stashed changes
     );
 
     try {
@@ -129,7 +133,11 @@ if (widget.jobId == null) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+<<<<<<< Updated upstream
     final url = Uri.parse('http://192.168.130.184:8080/messages');
+=======
+    final url = Uri.parse('http://192.168.34.59:8081/messages');
+>>>>>>> Stashed changes
     try {
       final response = await http.post(
         url,

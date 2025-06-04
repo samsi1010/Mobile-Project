@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class UbahPasswordPage extends StatefulWidget {
   const UbahPasswordPage({super.key});
@@ -23,6 +25,71 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk memverifikasi dan mengganti password
+  Future<void> _changePassword() async {
+    // Simulasikan proses pengiriman data untuk mengganti password
+    final currentPassword = _currentPasswordController.text;
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      // Jika ada yang kosong, tampilkan pesan kesalahan
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Semua field harus diisi'),
+      ));
+      return;
+    }
+
+    // Cek apakah password baru dan konfirmasi password cocok
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Password baru dan konfirmasi password tidak cocok'),
+      ));
+      return;
+    }
+
+    // Kirim permintaan untuk mengganti password ke backend
+    final response = await _sendChangePasswordRequest(currentPassword, newPassword);
+
+    if (response != null && response['status'] == 'success') {
+      // Jika berhasil, beri tahu pengguna
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Password berhasil diubah'),
+      ));
+      Navigator.pop(context); // Kembali ke halaman sebelumnya
+    } else {
+      // Jika gagal, tampilkan pesan kesalahan
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Gagal mengubah password'),
+      ));
+    }
+  }
+
+  // Fungsi untuk mengirimkan permintaan ke backend untuk mengganti password
+  Future<Map<String, dynamic>?> _sendChangePasswordRequest(String currentPassword, String newPassword) async {
+    final url = Uri.parse('http://192.168.34.59:8081/change-password');  // Ganti URL dengan endpoint API Anda
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error during password change: $e');
+      return null;
+    }
   }
 
   @override
@@ -171,10 +238,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       // Proses perubahan password di sini
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Password berhasil diubah')),
-                      );
-                      Navigator.pop(context);
+                      _changePassword();
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/pages/auth/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -18,6 +19,15 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _showValidationErrors = false;
   bool _isLoading = false;
 
+  // Fungsi untuk menyimpan nama, email, dan nomor telepon ke SharedPreferences
+  Future<void> saveUserDetails(String name, String email, String phone) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('user_name', name);  // Menyimpan nama
+    prefs.setString('user_email', email);  // Menyimpan email
+    prefs.setString('user_phone', phone);  // Menyimpan nomor telepon
+  }
+
+  // Fungsi registrasi
   Future<void> _register() async {
     setState(() {
       _showValidationErrors = true;
@@ -28,7 +38,11 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
 
+<<<<<<< Updated upstream
       final url = Uri.parse('http://192.168.130.184:8080/register');
+=======
+      final url = Uri.parse('http://192.168.34.59:8081/register');
+>>>>>>> Stashed changes
 
       final response = await http.post(
         url,
@@ -42,13 +56,15 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Menyimpan nama, email, dan nomor telepon setelah registrasi berhasil
+        await saveUserDetails(_namaController.text, _emailController.text, _phoneController.text);
+
         // Delay sebelum tampilkan snackbar
         await Future.delayed(Duration(milliseconds: 1500));
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registrasi berhasil")),
         );
-        print("Registrasi sukses: ${response.body}");
 
         // Delay biar user bisa baca snackbar
         await Future.delayed(Duration(milliseconds: 1500));

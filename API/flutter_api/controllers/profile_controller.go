@@ -9,6 +9,7 @@ import (
 
 	"flutter_api/database"
 	"flutter_api/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )

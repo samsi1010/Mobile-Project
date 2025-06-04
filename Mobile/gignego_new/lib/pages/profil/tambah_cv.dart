@@ -1,6 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Import image_picker
+import 'dart:io'; // Untuk menyimpan gambar yang dipilih
 
-class TambahCVPage extends StatelessWidget {
+class TambahCVPage extends StatefulWidget {
+  @override
+  _TambahCVPageState createState() => _TambahCVPageState();
+}
+
+class _TambahCVPageState extends State<TambahCVPage> {
+  File? _selectedImage; // Menyimpan gambar yang dipilih
+
+  // Fungsi untuk memilih gambar dari galeri atau kamera
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+
+    // Menampilkan dialog untuk memilih antara galeri atau kamera
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery, // Pilih dari galeri
+      imageQuality: 80, // Menentukan kualitas gambar
+    );
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path); // Menyimpan gambar yang dipilih
+      });
+    }
+  }
+
+  // Fungsi untuk mengupload gambar ke server (opsional, jika perlu)
+  Future<void> _uploadImage() async {
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pilih gambar terlebih dahulu!')));
+      return;
+    }
+    
+    // Misalnya Anda ingin mengupload gambar ke server
+    // Anda bisa menggunakan HTTP request untuk mengirim file ke server
+    // Contoh pseudocode:
+    // var request = http.MultipartRequest('POST', Uri.parse('your-server-url'));
+    // request.files.add(await http.MultipartFile.fromPath('file', _selectedImage!.path));
+    // var response = await request.send();
+    
+    // Setelah berhasil upload
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gambar berhasil diupload!')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,10 +77,9 @@ class TambahCVPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
+            // Tombol untuk memilih gambar
             OutlinedButton(
-              onPressed: () {
-                // aksi upload CV
-              },
+              onPressed: _pickImage, // Fungsi untuk memilih gambar
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(color: Colors.blue),
@@ -53,6 +96,16 @@ class TambahCVPage extends StatelessWidget {
               'maksimal 5MB (.docs, .pdf)',
               style: TextStyle(color: Colors.grey),
             ),
+            SizedBox(height: 20),
+            // Menampilkan gambar yang dipilih (jika ada)
+            _selectedImage != null
+                ? Image.file(
+                    _selectedImage!,
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.cover,
+                  )
+                : SizedBox(height: 200, child: Center(child: Text('Tidak ada gambar yang dipilih'))),
             Spacer(),
             Row(
               children: [
@@ -70,14 +123,17 @@ class TambahCVPage extends StatelessWidget {
                 SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // aksi simpan CV
-                    },
+                    onPressed: _uploadImage, // Fungsi untuk mengupload gambar
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple[300],
+                      backgroundColor: const Color(0xFFCD50F3),
                       elevation: 3,
                     ),
-                    child: Text('Simpan'),
+                    child: Text(
+    "Simpan", 
+    style: TextStyle(
+      fontWeight: FontWeight.bold, 
+      color: Colors.white, 
+    ),),
                   ),
                 ),
               ],
@@ -89,4 +145,3 @@ class TambahCVPage extends StatelessWidget {
     );
   }
 }
-

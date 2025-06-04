@@ -26,7 +26,7 @@ class _UbahEmailPageState extends State<UbahEmailPage> {
         title: const Text(
           'Email',
           style: TextStyle(
-            color: Colors.purple,
+            color: Color(0xFF9C27B0),
             fontWeight: FontWeight.bold,
           ),
         ),

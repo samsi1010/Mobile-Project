@@ -11,14 +11,100 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/models/applicant.dart';
 
 class ApiService {
+<<<<<<< Updated upstream
   static const String apiUrl = 'http://192.168.130.184:8080/job-postings';
+=======
+  static const String apiUrl = 'http://192.168.34.59:8081/job-postings';
+>>>>>>> Stashed changes
 
   // Fungsi untuk mengirim data pekerjaan baru ke API
   static Future<bool> createJob(Job job) async {
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+  try {
+    var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
 
-      // Pastikan field teks ditambahkan ke dalam form fields
+    // Tambahkan data pekerjaan lainnya ke request
+    request.fields['nama_pekerjaan'] = job.namaPekerjaan;
+    request.fields['deskripsi'] = job.deskripsi;
+    request.fields['lokasi'] = job.lokasi;
+    request.fields['harga_pekerjaan'] = job.hargaPekerjaan.toString();
+    request.fields['syarat_ketentuan'] = job.syaratKetentuan;
+    request.fields['jenis_pekerjaan'] = job.jenisPekerjaan;
+    request.fields['status_pekerjaan'] = job.status;
+    request.fields['time'] = job.time.toString();
+    request.fields['email'] = job.email;
+
+    // Menambahkan file gambar jika ada
+    if (job.gambar1.isNotEmpty) {
+      request.files.add(await http.MultipartFile.fromPath('image1', job.gambar1));
+    }
+    if (job.gambar2.isNotEmpty) {
+      request.files.add(await http.MultipartFile.fromPath('image2', job.gambar2));
+    }
+    if (job.gambar3.isNotEmpty) {
+      request.files.add(await http.MultipartFile.fromPath('image3', job.gambar3));
+    }
+
+    // Kirim request
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      return true;  // Berhasil
+    } else {
+      print("Failed to send data: ${response.statusCode}");
+      var responseBody = await http.Response.fromStream(response);
+      print('Error response body: ${responseBody.body}');
+      return false;  // Gagal
+    }
+  } catch (e) {
+    print('Error sending data to API: $e');
+    return false;  // Error
+  }
+}
+
+
+  static Future<List<Job>?> fetchJobsByEmail(String email) async {
+    try {
+      final url = Uri.parse('$apiUrl?email=$email');
+      final response = await http.get(url);
+      print('DEBUG: fetchJobsByEmail statusCode = ${response.statusCode}');
+      print('DEBUG: fetchJobsByEmail response body = ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Nah, di bagian inilah kamu ubah kode lama yang decode langsung ke List
+        // jadi decode ke Map dulu, lalu ambil value 'data' yang List itu
+        final Map<String, dynamic> jsonMap = jsonDecode(response.body);
+        final List<dynamic> jsonData =
+            jsonMap['data']; // <-- INI BAGIAN PENTING
+        print('DEBUG: jsonData length = ${jsonData.length}');
+        return jsonData.map((item) => Job.fromMap(item)).toList();
+      } else {
+        print('Failed to fetch jobs, status code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching jobs: $e');
+      return null;
+    }
+  }
+
+  static Future<bool> deleteJobFromApi(int id) async {
+    final response = await http.delete(
+      Uri.parse('http://192.168.34.59:8081/job-postings/id'),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      print('Failed to delete job: ${response.statusCode}');
+      return false;
+    }
+  }
+
+  static Future<bool> updateJob(Job job) async {
+    final url = Uri.parse('http://192.168.34.59:8081/job-postings/${job.id}');
+    try {
+      var request = http.MultipartRequest('PUT', url);
+
       request.fields['nama_pekerjaan'] = job.namaPekerjaan;
       request.fields['deskripsi'] = job.deskripsi;
       request.fields['lokasi'] = job.lokasi;
@@ -28,8 +114,9 @@ class ApiService {
       request.fields['status_pekerjaan'] = job.status;
       request.fields['time'] = job.time.toString();
       request.fields['email'] = job.email;
+      request.fields['waktu'] = job.waktu;
+      request.fields['tanggal'] = job.tanggal;
 
-      // File gambar
       if (job.gambar1.isNotEmpty) {
         request.files
             .add(await http.MultipartFile.fromPath('image1', job.gambar1));
@@ -48,32 +135,27 @@ class ApiService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print("Failed to send data: ${response.statusCode}");
-        var responseBody = await http.Response.fromStream(response);
-        print('Error response body: ${responseBody.body}');
+        print("Failed to update job: ${response.statusCode}");
+        var resBody = await http.Response.fromStream(response);
+        print('Response body: ${resBody.body}');
         return false;
       }
     } catch (e) {
-      print('Error sending data to API: $e');
+      print('Error updating job: $e');
       return false;
     }
   }
 
- static Future<List<Job>?> fetchJobsByEmail(String email) async {
-  try {
-    final url = Uri.parse('$apiUrl?email=$email');
+  static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
+    final url =
+        Uri.parse('http://192.168.34.59:8081/applications?job_id=$jobId');
     final response = await http.get(url);
-    print('DEBUG: fetchJobsByEmail statusCode = ${response.statusCode}');
-    print('DEBUG: fetchJobsByEmail response body = ${response.body}');
 
     if (response.statusCode == 200) {
-      // Nah, di bagian inilah kamu ubah kode lama yang decode langsung ke List
-      // jadi decode ke Map dulu, lalu ambil value 'data' yang List itu
-      final Map<String, dynamic> jsonMap = jsonDecode(response.body);
-      final List<dynamic> jsonData = jsonMap['data'];  // <-- INI BAGIAN PENTING
-      print('DEBUG: jsonData length = ${jsonData.length}');
-      return jsonData.map((item) => Job.fromMap(item)).toList();
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => Applicant.fromMap(item)).toList();
     } else {
+<<<<<<< Updated upstream
       print('Failed to fetch jobs, status code: ${response.statusCode}');
       return null;
     }
@@ -153,13 +235,20 @@ static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
   }
 }
 
+=======
+      print('Failed to fetch applicants: ${response.statusCode}');
+      return [];
+    }
+  }
+>>>>>>> Stashed changes
 }
 
 class FormPage extends StatefulWidget {
   final Function(Job) onJobAdded;
   final Job? job; // job bisa null jika membuat pekerjaan baru
 
-  const FormPage({Key? key, required this.onJobAdded, this.job}) : super(key: key);
+  const FormPage({Key? key, required this.onJobAdded, this.job})
+      : super(key: key);
 
   @override
   _FormPageState createState() => _FormPageState();
@@ -273,7 +362,7 @@ class _FormPageState extends State<FormPage> {
 
 // Lanjutkan proses pengiriman pekerjaan dengan email
       final jobBaru = Job(
-         id: widget.job?.id,
+        id: widget.job?.id,
         namaPekerjaan: _judulController.text,
         deskripsi: _deskripsiController.text,
         lokasi: _lokasiController.text,
@@ -290,7 +379,6 @@ class _FormPageState extends State<FormPage> {
         email: email,
       );
 
-      
       // Log data pekerjaan yang akan dikirim
       print("Data pekerjaan yang akan dikirim:");
       print("Nama Pekerjaan: ${jobBaru.namaPekerjaan}");
@@ -300,7 +388,6 @@ class _FormPageState extends State<FormPage> {
       print("Syarat Ketentuan: ${jobBaru.syaratKetentuan}");
       print("Jenis Pekerjaan: ${jobBaru.jenisPekerjaan}");
       print("Email: ${jobBaru.email}"); // Log email yang akan dikirim
-
 
       bool isSuccess;
       if (widget.job == null) {
@@ -318,8 +405,10 @@ class _FormPageState extends State<FormPage> {
       if (isSuccess) {
         widget.onJobAdded(jobBaru);
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(widget.job == null ? 'Pekerjaan berhasil ditambahkan!' : 'Pekerjaan berhasil diperbarui!')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(widget.job == null
+                ? 'Pekerjaan berhasil ditambahkan!'
+                : 'Pekerjaan berhasil diperbarui!')));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Terjadi kesalahan saat menyimpan pekerjaan!')));
@@ -329,9 +418,11 @@ class _FormPageState extends State<FormPage> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Pastikan semua field wajib diisi dan gambar 1 dipilih!")));
+          content:
+              Text("Pastikan semua field wajib diisi dan gambar 1 dipilih!")));
     }
   }
+
   @override
   void dispose() {
     _judulController.dispose();
@@ -344,7 +435,6 @@ class _FormPageState extends State<FormPage> {
     _timeController.dispose(); // Dispose untuk controller time
     super.dispose();
   }
-  
 
   @override
   Widget build(BuildContext context) {

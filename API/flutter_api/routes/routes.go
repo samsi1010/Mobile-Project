@@ -21,6 +21,7 @@ func SetupRoutes(router *gin.Engine) {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// Inisialisasi koneksi database
 	db := database.GetDB()
 	if db == nil {
 		panic("Gagal mendapatkan koneksi database")
@@ -39,21 +40,23 @@ func SetupRoutes(router *gin.Engine) {
 
 	// Work Experience Routes
 	workExperienceController := controllers.NewWorkExperienceController(db)
-	router.POST("/user/:userId/work-experience", workExperienceController.CreateUserWorkExperience)
-	router.GET("/user/:userId/work-experiences", workExperienceController.GetUserWorkExperiences)
 
-	router.POST("/work-experiences", workExperienceController.Create)
-	router.GET("/work-experiences", workExperienceController.GetAll)
-	router.GET("/work-experiences/:id", workExperienceController.GetByID)
-	router.PUT("/work-experiences/:id", workExperienceController.Update)
-	router.DELETE("/work-experiences/:id", workExperienceController.Delete)
+	// Routes untuk pengalaman kerja berdasarkan user ID
+	router.POST("/user/:userId/work-experience", workExperienceController.CreateUserWorkExperience) // Menambah pengalaman kerja berdasarkan user ID
+	router.GET("/user/:userId/work-experiences", workExperienceController.GetUserWorkExperiences)   // Mengambil pengalaman kerja berdasarkan user ID
+
+	// Routes untuk pengalaman kerja secara umum
+	router.POST("/work-experiences", workExperienceController.Create)       // Menambah pengalaman kerja secara umum
+	router.GET("/work-experiences", workExperienceController.GetAll)        // Mengambil semua pengalaman kerja
+	router.GET("/work-experiences/:id", workExperienceController.GetByID)   // Mengambil pengalaman kerja berdasarkan ID
+	router.PUT("/work-experiences/:id", workExperienceController.Update)    // Memperbarui pengalaman kerja berdasarkan ID
+	router.DELETE("/work-experiences/:id", workExperienceController.Delete) // Menghapus pengalaman kerja berdasarkan ID
 
 	// Education Routes
 	educationController := controllers.NewEducationController(db)
 	router.POST("/education", educationController.AddEducation)
 	router.GET("/educations", educationController.GetAllEducations)
 	router.GET("/user/:userId/educations", educationController.GetUserEducations)
-	router.DELETE("/education/:id", educationController.DeleteEducation)
 
 	// Help Request Routes
 	router.POST("/help-requests", controllers.CreateHelpRequest)
