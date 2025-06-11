@@ -38,8 +38,11 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
 
+<<<<<<< HEAD
       final url = Uri.parse('http://192.168.216.59:8081/register');
+=======
       final url = Uri.parse('http://192.168.90.59:8081/register');
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
 
       final response = await http.post(
         url,

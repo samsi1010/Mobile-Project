@@ -64,8 +64,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<Map<String, dynamic>?> _loginUser(
       String email, String password) async {
+<<<<<<< HEAD
     final url = Uri.parse('http://192.168.216.59:8081/login');
+=======
     final url = Uri.parse('http://192.168.90.59:8081/login');
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
     try {
       final response = await http.post(
         url,
@@ -105,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 22),
+<<<<<<< HEAD
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -144,6 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: const Text(
                         "Daftar",
+=======
         child: Form(
           key: _formKey,
           onChanged: _checkFormValidity,
@@ -168,6 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                     child: const Text("Daftar",
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
                         style: TextStyle(
                             color: Colors.purple, fontWeight: FontWeight.w500)),
                   ),

@@ -64,9 +64,12 @@ class _PendaftarPageState extends State<PendaftarPage> {
       isLoadingApplicants = true;
     });
 
+<<<<<<< HEAD
     final url = Uri.parse(
         'http://192.168.216.59:8081/applications?job_id=${widget.jobId}');
+=======
     final url = Uri.parse('http://192.168.90.59:8081/applications?job_id=${widget.jobId}');
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -103,7 +106,9 @@ class _PendaftarPageState extends State<PendaftarPage> {
         jobStatus = status; // Memperbarui status pekerjaan
       });
       ScaffoldMessenger.of(context).showSnackBar(
+<<<<<<< HEAD
           SnackBar(content: Text('Status pekerjaan diubah menjadi $status')));
+=======
         SnackBar(content: Text('Terjadi kesalahan jaringan')),
       );
     }
@@ -123,12 +128,14 @@ class _PendaftarPageState extends State<PendaftarPage> {
         SnackBar(content: Text('Pekerjaan telah dimulai dan status diubah ke Proses')),
       );
       loadApplicants(); // Refresh daftar pelamar setelah status berubah
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal mengubah status pekerjaan')));
     }
   }
 
+<<<<<<< HEAD
   // Fungsi untuk memulai pekerjaan
   Future<void> _startJob() async {
     await _updateJobStatus('Proses');
@@ -171,6 +178,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
           ),
         ],
       ),
+=======
   // Fungsi untuk mengupdate status pekerjaan menjadi "Selesai"
   Future<void> selesaiPekerjaan() async {
     final url = Uri.parse('http://192.168.90.59:8081/jobs/${widget.jobId}/status');
@@ -178,15 +186,19 @@ class _PendaftarPageState extends State<PendaftarPage> {
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'status': 'Selesai'}), // Mengirim status "Selesai"
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
     );
   }
 
+<<<<<<< HEAD
   Future<void> _updateApplicantStatus(int applicationId, String status) async {
     final url =
         Uri.parse('http://192.168.216.59:8081/applications/$applicationId');
+=======
   // Fungsi untuk mengupdate status pelamar
   Future<void> updateApplicantStatus(int applicationId, String status) async {
     final url = Uri.parse('http://192.168.90.59:8081/applications/$applicationId');
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},

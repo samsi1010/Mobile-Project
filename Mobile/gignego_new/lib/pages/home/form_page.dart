@@ -11,7 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/models/applicant.dart';
 
 class ApiService {
+<<<<<<< HEAD
   static const String apiUrl = 'http://192.168.216.59:8081/job-postings';
+=======
   static const String apiUrl = 'http://192.168.90.59:8081/job-postings';
 >>>>>>> parent of 3b9aa30 (ubah ui dikit)
 
@@ -153,10 +155,12 @@ class ApiService {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((item) => Applicant.fromMap(item)).toList();
     } else {
+<<<<<<< HEAD
       print('Failed to fetch applicants: ${response.statusCode}');
       return [];
     }
   }
+=======
       print('Failed to fetch jobs, status code: ${response.statusCode}');
       return null;
     }
@@ -236,6 +240,7 @@ static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
   }
 }
 
+>>>>>>> parent of 3b9aa30 (ubah ui dikit)
 }
 
 class FormPage extends StatefulWidget {
