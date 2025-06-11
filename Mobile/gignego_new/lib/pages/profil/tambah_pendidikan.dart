@@ -100,7 +100,7 @@ Future<void> _submitEducation() async {
     // Mengirim data pendidikan ke API
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.34.59:8081/education'), // Ganti dengan URL API Anda
+        Uri.parse('http://192.168.216.59:8081/education'), // Ganti dengan URL API Anda
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,  // Kirimkan email yang sesuai

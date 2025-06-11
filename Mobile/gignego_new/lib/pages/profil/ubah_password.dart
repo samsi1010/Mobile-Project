@@ -69,7 +69,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
 
   // Fungsi untuk mengirimkan permintaan ke backend untuk mengganti password
   Future<Map<String, dynamic>?> _sendChangePasswordRequest(String currentPassword, String newPassword) async {
-    final url = Uri.parse('http://192.168.34.59:8081/change-password');  // Ganti URL dengan endpoint API Anda
+    final url = Uri.parse('http://192.168.216.59:8081/change-password');  // Ganti URL dengan endpoint API Anda
 
     try {
       final response = await http.post(

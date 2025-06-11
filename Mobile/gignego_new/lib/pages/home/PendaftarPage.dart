@@ -64,12 +64,8 @@ class _PendaftarPageState extends State<PendaftarPage> {
       isLoadingApplicants = true;
     });
 
-<<<<<<< Updated upstream
-    final url = Uri.parse('http://192.168.130.184:8080/applications?job_id=${widget.jobId}');
-=======
     final url = Uri.parse(
-        'http://192.168.34.59:8081/applications?job_id=${widget.jobId}');
->>>>>>> Stashed changes
+        'http://192.168.216.59:8081/applications?job_id=${widget.jobId}');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -94,7 +90,7 @@ class _PendaftarPageState extends State<PendaftarPage> {
 
   Future<void> _updateJobStatus(String status) async {
     final url =
-        Uri.parse('http://192.168.34.59:8081/jobs/${widget.jobId}/status');
+        Uri.parse('http://192.168.216.59:8081/jobs/${widget.jobId}/status');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -106,44 +102,13 @@ class _PendaftarPageState extends State<PendaftarPage> {
         jobStatus = status; // Memperbarui status pekerjaan
       });
       ScaffoldMessenger.of(context).showSnackBar(
-<<<<<<< Updated upstream
-        SnackBar(content: Text('Terjadi kesalahan jaringan')),
-      );
-    }
-  }
-
-  // Fungsi untuk mengupdate status pekerjaan menjadi "Proses"
-  Future<void> mulaiPekerjaan() async {
-    final url = Uri.parse('http://192.168.130.184:8080/jobs/${widget.jobId}/status');
-    final response = await http.patch(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'status': 'Proses'}), // Mengirim status "Proses"
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pekerjaan telah dimulai dan status diubah ke Proses')),
-      );
-      loadApplicants(); // Refresh daftar pelamar setelah status berubah
-=======
           SnackBar(content: Text('Status pekerjaan diubah menjadi $status')));
->>>>>>> Stashed changes
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal mengubah status pekerjaan')));
     }
   }
 
-<<<<<<< Updated upstream
-  // Fungsi untuk mengupdate status pekerjaan menjadi "Selesai"
-  Future<void> selesaiPekerjaan() async {
-    final url = Uri.parse('http://192.168.130.184:8080/jobs/${widget.jobId}/status');
-    final response = await http.patch(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'status': 'Selesai'}), // Mengirim status "Selesai"
-=======
   // Fungsi untuk memulai pekerjaan
   Future<void> _startJob() async {
     await _updateJobStatus('Proses');
@@ -186,19 +151,12 @@ class _PendaftarPageState extends State<PendaftarPage> {
           ),
         ],
       ),
->>>>>>> Stashed changes
     );
   }
 
-<<<<<<< Updated upstream
-  // Fungsi untuk mengupdate status pelamar
-  Future<void> updateApplicantStatus(int applicationId, String status) async {
-    final url = Uri.parse('http://192.168.130.184:8080/applications/$applicationId');
-=======
   Future<void> _updateApplicantStatus(int applicationId, String status) async {
     final url =
-        Uri.parse('http://192.168.34.59:8081/applications/$applicationId');
->>>>>>> Stashed changes
+        Uri.parse('http://192.168.216.59:8081/applications/$applicationId');
     final response = await http.patch(
       url,
       headers: {'Content-Type': 'application/json'},

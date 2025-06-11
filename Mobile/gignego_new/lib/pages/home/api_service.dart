@@ -3,7 +3,7 @@ import 'package:flutter_application/pages/models/job.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String apiUrl = 'http://192.168.34.59:8081/job-postings';
+  static const String apiUrl = 'http://192.168.216.59:8081/job-postings';
 
   static Future<List<Job>?> fetchJobs() async {
     try {

@@ -11,11 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application/pages/models/applicant.dart';
 
 class ApiService {
-<<<<<<< Updated upstream
-  static const String apiUrl = 'http://192.168.130.184:8080/job-postings';
-=======
-  static const String apiUrl = 'http://192.168.34.59:8081/job-postings';
->>>>>>> Stashed changes
+  static const String apiUrl = 'http://192.168.216.59:8081/job-postings';
 
   // Fungsi untuk mengirim data pekerjaan baru ke API
   static Future<bool> createJob(Job job) async {
@@ -89,7 +85,7 @@ class ApiService {
 
   static Future<bool> deleteJobFromApi(int id) async {
     final response = await http.delete(
-      Uri.parse('http://192.168.34.59:8081/job-postings/id'),
+      Uri.parse('http://192.168.216.59:8081/job-postings/id'),
     );
 
     if (response.statusCode == 200) {
@@ -101,7 +97,7 @@ class ApiService {
   }
 
   static Future<bool> updateJob(Job job) async {
-    final url = Uri.parse('http://192.168.34.59:8081/job-postings/${job.id}');
+    final url = Uri.parse('http://192.168.216.59:8081/job-postings/${job.id}');
     try {
       var request = http.MultipartRequest('PUT', url);
 
@@ -148,99 +144,17 @@ class ApiService {
 
   static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
     final url =
-        Uri.parse('http://192.168.34.59:8081/applications?job_id=$jobId');
+        Uri.parse('http://192.168.216.59:8081/applications?job_id=$jobId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((item) => Applicant.fromMap(item)).toList();
     } else {
-<<<<<<< Updated upstream
-      print('Failed to fetch jobs, status code: ${response.statusCode}');
-      return null;
-    }
-  } catch (e) {
-    print('Error fetching jobs: $e');
-    return null;
-  }
-}
-
-
-
-static Future<bool> deleteJobFromApi(int id) async {
-    final response = await http.delete(
-      Uri.parse('http://192.168.130.184:8080/job-postings/id'),
-    );
-
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      print('Failed to delete job: ${response.statusCode}');
-      return false;
-    }
-  }
-
-  static Future<bool> updateJob(Job job) async {
-  final url = Uri.parse('http://192.168.130.184:8080/job-postings/${job.id}');
-  try {
-    var request = http.MultipartRequest('PUT', url);
-
-    request.fields['nama_pekerjaan'] = job.namaPekerjaan;
-    request.fields['deskripsi'] = job.deskripsi;
-    request.fields['lokasi'] = job.lokasi;
-    request.fields['harga_pekerjaan'] = job.hargaPekerjaan.toString();
-    request.fields['syarat_ketentuan'] = job.syaratKetentuan;
-    request.fields['jenis_pekerjaan'] = job.jenisPekerjaan;
-    request.fields['status_pekerjaan'] = job.status;
-    request.fields['time'] = job.time.toString();
-    request.fields['email'] = job.email;
-    request.fields['waktu'] = job.waktu;
-    request.fields['tanggal'] = job.tanggal;
-
-    if (job.gambar1.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('image1', job.gambar1));
-    }
-    if (job.gambar2.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('image2', job.gambar2));
-    }
-    if (job.gambar3.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('image3', job.gambar3));
-    }
-
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      print("Failed to update job: ${response.statusCode}");
-      var resBody = await http.Response.fromStream(response);
-      print('Response body: ${resBody.body}');
-      return false;
-    }
-  } catch (e) {
-    print('Error updating job: $e');
-    return false;
-  }
-}
-static Future<List<Applicant>> fetchApplicantsByJobId(int jobId) async {
-  final url = Uri.parse('http://192.168.130.184:8080/applications?job_id=$jobId');
-  final response = await http.get(url);
-
-  if (response.statusCode == 200) {
-    final List<dynamic> data = jsonDecode(response.body);
-    return data.map((item) => Applicant.fromMap(item)).toList();
-  } else {
-    print('Failed to fetch applicants: ${response.statusCode}');
-    return [];
-  }
-}
-
-=======
       print('Failed to fetch applicants: ${response.statusCode}');
       return [];
     }
   }
->>>>>>> Stashed changes
 }
 
 class FormPage extends StatefulWidget {

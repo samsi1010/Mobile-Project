@@ -103,7 +103,7 @@ class _StatusKerjaPageState extends State<StatusKerjaPage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'https://api.example.com/jobs/${updatedJob.id}'), // Pastikan URL benar
+            'https://192.168.216.59:8081/jobs/${updatedJob.id}'), // Pastikan URL benar
         body: {
           'nama_pekerjaan': updatedJob.namaPekerjaan,
           'deskripsi': updatedJob.deskripsi,

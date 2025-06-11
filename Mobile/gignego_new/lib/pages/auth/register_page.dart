@@ -38,11 +38,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
 
-<<<<<<< Updated upstream
-      final url = Uri.parse('http://192.168.130.184:8080/register');
-=======
-      final url = Uri.parse('http://192.168.34.59:8081/register');
->>>>>>> Stashed changes
+      final url = Uri.parse('http://192.168.216.59:8081/register');
 
       final response = await http.post(
         url,

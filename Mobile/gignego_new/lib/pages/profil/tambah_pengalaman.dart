@@ -64,7 +64,7 @@ class _TambahPengalamanPageState extends State<TambahPengalamanPage> {
       // Mengirim data ke API
       try {
         final response = await http.post(
-          Uri.parse('http://192.168.34.59:8081/work-experiences'), // Ganti dengan URL API Anda
+          Uri.parse('http://192.168.216.59:8081/work-experiences'), // Ganti dengan URL API Anda
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'position': posisi,

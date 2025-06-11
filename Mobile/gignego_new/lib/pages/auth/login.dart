@@ -4,7 +4,6 @@ import 'package:flutter_application/pages/home/home_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -52,14 +51,9 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-<<<<<<< Updated upstream
-  Future<Map<String, dynamic>?> _loginUser(String email, String password) async {
-    final url = Uri.parse('http://192.168.130.184:8080/login');
-=======
   Future<Map<String, dynamic>?> _loginUser(
       String email, String password) async {
-    final url = Uri.parse('http://192.168.34.59:8081/login');
->>>>>>> Stashed changes
+    final url = Uri.parse('http://192.168.216.59:8081/login');
     try {
       final response = await http.post(
         url,
@@ -105,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                SvgPicture.asset('assets/gignego.svg', height: 200, width: 400.0),
                 const SizedBox(height: 10),
                 const Text(
                   "Masuk",
