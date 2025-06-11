@@ -29,6 +29,14 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  // Fungsi untuk menyimpan email setelah login berhasil
+  Future<void> saveEmail(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('user_email', email); // Menyimpan email pengguna yang login
+    print(
+        "Email disimpan: $email"); // Debugging untuk memastikan email disimpan
+  }
+
   Future<void> _submitForm() async {
     if (!_isFormValid) return;
 
@@ -42,6 +50,9 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = false);
 
     if (response != null && response['status'] == 'success') {
+      // Setelah login berhasil, simpan email pengguna di SharedPreferences
+      await saveEmail(email);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomePage()),
@@ -54,11 +65,15 @@ class _LoginPageState extends State<LoginPage> {
   Future<Map<String, dynamic>?> _loginUser(
       String email, String password) async {
     final url = Uri.parse('http://192.168.216.59:8081/login');
+    final url = Uri.parse('http://192.168.90.59:8081/login');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -71,6 +86,17 @@ class _LoginPageState extends State<LoginPage> {
       return null;
     }
   }
+
+  Future<void> logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();  // Kosongkan semua data dari SharedPreferences
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => LoginPage()), // Arahkan ke halaman login
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,78 +144,100 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: const Text(
                         "Daftar",
+        child: Form(
+          key: _formKey,
+          onChanged: _checkFormValidity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              Image.asset('assets/gignego.png', height: 50),
+              const SizedBox(height: 10),
+              const Text("Masuk",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Belum punya akun? "),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => RegisterPage()),
+                      );
+                    },
+                    child: const Text("Daftar",
                         style: TextStyle(
-                            color: Colors.purple, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                const DividerWithText(text: "atau masuk dengan email"),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _emailController,
-                  label: "Email*",
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Email tidak boleh kosong";
-                    if (!value.contains('@')) return "Email tidak valid";
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _passwordController,
-                  label: "Password*",
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Password tidak boleh kosong";
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isFormValid && !_isLoading ? _submitForm : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isFormValid
-                        ? const Color(0xFF781CAA)
-                        : Colors.grey.shade300,
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                            color: Colors.purple, fontWeight: FontWeight.w500)),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Masuk",
+                ],
+              ),
+              const SizedBox(height: 24),
+              const DividerWithText(text: "atau masuk dengan email"),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: _emailController,
+                label: "Email*",
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty)
+                    return "Email tidak boleh kosong";
+                  if (!value.contains('@')) return "Email tidak valid";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _passwordController,
+                label: "Password*",
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty)
+                    return "Password tidak boleh kosong";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _isFormValid && !_isLoading ? _submitForm : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isFormValid
+                      ? const Color(0xFF781CAA)
+                      : Colors.grey.shade300,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Masuk",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(12),
+                color: const Color(0xFFF8E9FF),
+                width: double.infinity,
+                child: const Center(
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Butuh bantuan? Hubungi ",
+                      children: [
+                        TextSpan(
+                          text: "Gignego Care",
                           style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 32),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  color: const Color(0xFFF8E9FF),
-                  width: double.infinity,
-                  child: const Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Butuh bantuan? Hubungi ",
-                        children: [
-                          TextSpan(
-                            text: "Gignego Care",
-                            style: TextStyle(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
+                              color: Colors.purple,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),

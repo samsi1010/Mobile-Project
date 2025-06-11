@@ -39,6 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       final url = Uri.parse('http://192.168.216.59:8081/register');
+      final url = Uri.parse('http://192.168.90.59:8081/register');
 
       final response = await http.post(
         url,
@@ -96,12 +97,6 @@ class _RegisterPageState extends State<RegisterPage> {
       appBar: AppBar(
         title: Text('Register', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new),
-          onPressed: () {
-            Navigator.pop(context); // Menambahkan tombol kembali
-          },
-        ),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -139,9 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           );
                         },
                         child: Text("Sign in",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple)),
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -182,8 +175,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       onPressed: _isLoading ? null : _register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF781CAA),
-                        padding: EdgeInsets.symmetric(vertical: 16), // Menambah padding
-                        textStyle: TextStyle(fontSize: 18), // Memperjelas teks tombol
                       ),
                       child: _isLoading
                           ? SizedBox(
